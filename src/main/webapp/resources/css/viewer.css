@@ -1,0 +1,163 @@
+@charset "UTF-8";
+
+@import
+	url('https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap');
+
+@import
+	url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+body, html {
+	margin: 0;
+}
+
+.table-view {
+	overflow-x: auto;
+	width: 95%;
+	margin: auto;
+	margin-top: 15px;
+}
+
+.table-view table {
+	max-width: 100%;
+	width: 100%;
+	border-spacing: 0px;
+	border-collapse: collapse;
+}
+
+.table-view table td {
+	background-color: #ededed;
+	border: 1px solid #d6d6d6;
+}
+
+.table-view table td, th {
+	padding: 8px 10px;
+	font-family: 'Open Sans';
+	text-align: center;
+}
+
+.table-view table th {
+	background-color: #cfcfcf;
+}
+
+.steps {
+	display: flex;
+}
+
+.hidden {
+	display: none;
+}
+
+.custom-select-option.preview {
+	display: block;
+	opacity: 1;
+}
+
+.custom-select-option.preview:hover {
+	background-color: initial;
+	opacity: 0.9;
+}
+
+.custom-select-option:hover {
+	background-color: #5AAFEE;
+}
+
+.custom-select-options {
+	position: absolute;
+	top: 47px;
+	background-color: #485761;
+	display: none;
+	width: 100%;
+	word-break: break-all;
+}
+
+.custom-select-option {
+	border-top: 1px solid white;
+	cursor: pointer;
+	color: white;
+	padding: 10px 15px;
+	z-index: 1;
+}
+
+.custom-select-container {
+	font-family: 'Bebas Neue';
+	border-radius: 2px;
+	background-color: #485761;
+	font-size: 20px;
+	transition: 0.2s;
+	width: fit-content;
+	position: relative;
+	width: 150px;
+}
+
+.custom-select-container:hover>.custom-select-options {
+	display: block;
+}
+
+.header {
+	overflow: auto;
+	margin: auto;
+	width: 80%;
+}
+
+.header h1 {
+	letter-spacing: 1px;
+	margin-bottom: 0;
+	x
+}
+
+.header p {
+	margin-top: 0px;
+	font-size: 25px;
+}
+
+.content {
+	padding: 2.5% 0%;
+}
+
+.top {
+	font-family: 'Bebas Neue';
+	background-color: #485761;
+	color: white;
+}
+
+.steps {
+	margin: 0% 10%;
+}
+/* error message */
+.error-message {
+	position: fixed;
+	top: -40px;
+	width: 80%;
+	left: 10%;
+	background-color: #485761;
+	display: flex;
+	font-family: 'Bebas Neue';
+	transition:0.5s;
+}
+
+.error-message .error-icon, .error-message .close-icon {
+	padding: 8px;
+	background-color: white;
+}
+
+.error-message .material-icons {
+	vertical-align: middle;
+}
+
+.error-message .error-message-text {
+	display: flex;
+	align-items: center;
+	color: white;
+	font-size: 20px;
+	padding-left: 15px;
+	border: 2px solid white;
+	border-left: 0px;
+	border-right:0px;
+	width: 100%;
+}
+.error-message .close-icon{
+	cursor:pointer;
+}
+.material-icons{
+	user-select:none;
+}

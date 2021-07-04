@@ -1,30 +1,34 @@
 package com.colonelparrot.dbviewer.commons.exceptions;
 
+/**
+ * @author ColonelParrot
+ * @version 1.0
+ */
 public class TableRetrievalException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8868749389849077532L;
+
 	public TableRetrievalException() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public TableRetrievalException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
 	public TableRetrievalException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	public TableRetrievalException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	public TableRetrievalException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
-		// TODO Auto-generated constructor stub
 	}
 
 }

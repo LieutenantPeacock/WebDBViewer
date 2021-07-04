@@ -1,30 +1,34 @@
 package com.colonelparrot.dbviewer.commons.exceptions;
 
+/**
+ * @author ColonelParrot
+ * @version 1.0
+ */
 public class MetadataRetrievalException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7280066924664575507L;
+
 	public MetadataRetrievalException() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public MetadataRetrievalException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
 	public MetadataRetrievalException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	public MetadataRetrievalException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	public MetadataRetrievalException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
-		// TODO Auto-generated constructor stub
 	}
 
 }
