@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author ColonelParrot
- * @version 1.0
+ * @version 1.1
  */
 public class ConnectionFactory {
 	private static final Logger LOG = LoggerFactory.getLogger(ConnectionFactory.class);
@@ -33,7 +33,7 @@ public class ConnectionFactory {
 			LOG.info("Starting connection to [{}] with username [{}] and password [{}]", url, username,
 					password.replaceAll(".", "*"));
 			con = DriverManager.getConnection(url, username, password);
-			LOG.debug("Successfully connected to [{}]", url);
+			LOG.info("Successfully connected to [{}]", url);
 		} catch (SQLException e) {
 			LOG.error("Error occured: [{}] ", e);
 		}

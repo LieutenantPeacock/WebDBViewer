@@ -93,3 +93,10 @@ function tableDataHandler(response) {
 		showWarning(parsedJSON.message);
 	}
 }
+
+const logoutButton = document.querySelector('#logout');
+if(logoutButton != null){
+	logoutButton.addEventListener('click', function(){
+		location = "logout";
+	});
+}

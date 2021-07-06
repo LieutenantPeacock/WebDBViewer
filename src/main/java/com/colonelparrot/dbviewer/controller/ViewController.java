@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -29,7 +31,7 @@ import com.colonelparrot.dbviewer.db.ConnectionFactory;
 
 /**
  * @author ColonelParrot
- * @version 1.0
+ * @version 1.1
  */
 @Controller
 public class ViewController {
@@ -42,14 +44,17 @@ public class ViewController {
 	}
 
 	@RequestMapping(value = "/viewer", method = RequestMethod.GET)
-	public String getStuff(Model model) {
-		final Connection con = getConnection();
-		List<String> databaseNames;
-		try {
-			databaseNames = getDatabases(con);
-			model.addAttribute("databases", databaseNames);
-		} catch (Exception e) {
-			LOG.error("error", e);
+	public String getStuff(Model model, HttpSession session) {
+		final boolean isLoggedIn = null != session.getAttribute("isLoggedIn");
+		if(isLoggedIn) {
+			final Connection con = getConnection();
+			List<String> databaseNames;
+			try {
+				databaseNames = getDatabases(con);
+				model.addAttribute("databases", databaseNames);
+			} catch (Exception e) {
+				LOG.error("error", e);
+			}
 		}
 		return "viewer";
 	}
@@ -58,116 +63,123 @@ public class ViewController {
 	@RequestMapping(value = "/viewer", method = RequestMethod.POST)
 	public QueryResponse getData(@RequestParam(value = "type", required = false) String type,
 			@RequestParam(value = "table", required = false) String table,
-			@RequestParam(value = "database", required = false) String database, Model model) {
+			@RequestParam(value = "database", required = false) String database, Model model,
+			HttpSession session) {
+		final boolean isLoggedIn = null != session.getAttribute("isLoggedIn");
 		QueryResponse response = new QueryResponse();
-		if (!isEmptyParam(type)) {
-			if (type.equals("row")) {
-				LOG.info("Table rows/data requested");
-				/*
-				 * Getting table rows/data
-				 */
-				if (!isEmptyParam(table, database)) {
-					LOG.info("Received table [{}] and database [{}] values", table, database);
-					int databaseIndex;
-					int tableIndex;
-					try {
-						databaseIndex = Integer.parseInt(database);
-						tableIndex = Integer.parseInt(table);
-						LOG.info("Table and database values are numbers");
-					} catch (NumberFormatException e) {
-						LOG.info("Fail request, table and/or database value(s) is/are not a number");
-						/*
-						 * Has to be an index to prevent SQL injection
-						 */
-						failRequest(response, INVALID_FIELD_VALUE);
-						return response;
-					}
-					try {
-						List<String> databaseNames = getDatabases(getConnection());
-						LOG.info("Retrieved database names [{}]", Arrays.toString(databaseNames.toArray()));
-						int dbnamessize = databaseNames.size();
-						if (databaseIndex >= dbnamessize || databaseIndex < 0) {
-							LOG.info(
-									"Fail request, database index is greater than the size of databases [{}] or is smaller than 0",
-									dbnamessize);
+		if(isLoggedIn) {
+			if (!isEmptyParam(type)) {
+				if (type.equals("row")) {
+					LOG.info("Table rows/data requested");
+					/*
+					 * Getting table rows/data
+					 */
+					if (!isEmptyParam(table, database)) {
+						LOG.info("Received table [{}] and database [{}] values", table, database);
+						int databaseIndex;
+						int tableIndex;
+						try {
+							databaseIndex = Integer.parseInt(database);
+							tableIndex = Integer.parseInt(table);
+							LOG.info("Table and database values are numbers");
+						} catch (NumberFormatException e) {
+							LOG.info("Fail request, table and/or database value(s) is/are not a number");
+							/*
+							 * Has to be an index to prevent SQL injection
+							 */
 							failRequest(response, INVALID_FIELD_VALUE);
-						} else {
-							String databaseName = databaseNames.get(databaseIndex);
-							List<String> tableNames = getTables(databaseName);
-							if (tableIndex >= tableNames.size() || tableIndex < 0) {
+							return response;
+						}
+						try {
+							List<String> databaseNames = getDatabases(getConnection());
+							LOG.info("Retrieved database names [{}]", Arrays.toString(databaseNames.toArray()));
+							int dbnamessize = databaseNames.size();
+							if (databaseIndex >= dbnamessize || databaseIndex < 0) {
 								LOG.info(
-										"Fail request, table index is greater than the table name size of [{}] or is smaller than 0",
+										"Fail request, database index is greater than the size of databases [{}] or is smaller than 0",
 										dbnamessize);
 								failRequest(response, INVALID_FIELD_VALUE);
 							} else {
-								String tableName = tableNames.get(tableIndex);
-								LOG.info("Retrieved table name [{}]", tableName);
-								ResultSet rs = getTableContentResultSet(tableName, databaseName);
-								TableData convertedResultSet = resultSetToTableData(rs);
-								LOG.info(
-										"Converted ResultSet from getTableContentResultSet() to TableData object, setting success to true and returning response");
-								response.setSuccess(true);
-								response.setData(convertedResultSet);
+								String databaseName = databaseNames.get(databaseIndex);
+								List<String> tableNames = getTables(databaseName);
+								if (tableIndex >= tableNames.size() || tableIndex < 0) {
+									LOG.info(
+											"Fail request, table index is greater than the table name size of [{}] or is smaller than 0",
+											dbnamessize);
+									failRequest(response, INVALID_FIELD_VALUE);
+								} else {
+									String tableName = tableNames.get(tableIndex);
+									LOG.info("Retrieved table name [{}]", tableName);
+									ResultSet rs = getTableContentResultSet(tableName, databaseName);
+									TableData convertedResultSet = resultSetToTableData(rs);
+									LOG.info(
+											"Converted ResultSet from getTableContentResultSet() to TableData object, setting success to true and returning response");
+									response.setSuccess(true);
+									response.setData(convertedResultSet);
+								}
 							}
-						}
 
-					} catch (Exception e) {
-						LOG.error("error [{}]", e);
-						failRequest(response, "An error occured. Contact your administrator if this error persists");
-					}
-				} else {
-					LOG.info("Fail request, able index or database index is missing");
-					failRequest(response, "Please fill all required fields");
-				}
-			} else if (type.equals("table")) {
-				LOG.info("Tables in database requested");
-				/*
-				 * Geting tables in database
-				 */
-				if (!isEmptyParam(database)) {
-					LOG.info("Received database parameter [{}]", database);
-					int databaseIndex;
-					try {
-						databaseIndex = Integer.parseInt(database);
-					} catch (NumberFormatException e) {
-						LOG.info("Fail request, database parameter is not a number");
-						/*
-						 * Has to be an index to prevent SQL injection
-						 */
-						failRequest(response, INVALID_FIELD_VALUE);
-						return response;
-					}
-					try {
-						List<String> databaseNames = getDatabases(getConnection());
-						int dbnamessize = databaseNames.size();
-						LOG.info("Retrieved database names [{}]", Arrays.toString(databaseNames.toArray()));
-						if (databaseIndex >= dbnamessize || databaseIndex < 0) {
-							LOG.info(
-									"Fail request, database index is greater than the size of databases [{}] or is smaller than 0",
-									dbnamessize);
-							failRequest(response, INVALID_FIELD_VALUE);
-						} else {
-							String databaseName = databaseNames.get(databaseIndex);
-							LOG.info("Retrieved database name [{}]", databaseName);
-							DatabaseData databaseData = new DatabaseData();
-							List<String> tableNames = getTables(databaseName);
-							LOG.info("Retrieved table names [{}]", Arrays.toString(tableNames.toArray()));
-							databaseData.setTableNames(tableNames);
-							response.setSuccess(true);
-							response.setData(databaseData);
+						} catch (Exception e) {
+							LOG.error("error [{}]", e);
+							failRequest(response, "An error occured. Contact your administrator if this error persists");
 						}
-					} catch (SQLException e) {
-						LOG.error("error [{}]", e);
-						failRequest(response, "An error occured. Contact your administrator if this error persists");
+					} else {
+						LOG.info("Fail request, able index or database index is missing");
+						failRequest(response, "Please fill all required fields");
 					}
-				} else {
-					LOG.info("Fail request, database parameter is missing");
-					failRequest(response, "Please fill all required fields");
+				} else if (type.equals("table")) {
+					LOG.info("Tables in database requested");
+					/*
+					 * Geting tables in database
+					 */
+					if (!isEmptyParam(database)) {
+						LOG.info("Received database parameter [{}]", database);
+						int databaseIndex;
+						try {
+							databaseIndex = Integer.parseInt(database);
+						} catch (NumberFormatException e) {
+							LOG.info("Fail request, database parameter is not a number");
+							/*
+							 * Has to be an index to prevent SQL injection
+							 */
+							failRequest(response, INVALID_FIELD_VALUE);
+							return response;
+						}
+						try {
+							List<String> databaseNames = getDatabases(getConnection());
+							int dbnamessize = databaseNames.size();
+							LOG.info("Retrieved database names [{}]", Arrays.toString(databaseNames.toArray()));
+							if (databaseIndex >= dbnamessize || databaseIndex < 0) {
+								LOG.info(
+										"Fail request, database index is greater than the size of databases [{}] or is smaller than 0",
+										dbnamessize);
+								failRequest(response, INVALID_FIELD_VALUE);
+							} else {
+								String databaseName = databaseNames.get(databaseIndex);
+								LOG.info("Retrieved database name [{}]", databaseName);
+								DatabaseData databaseData = new DatabaseData();
+								List<String> tableNames = getTables(databaseName);
+								LOG.info("Retrieved table names [{}]", Arrays.toString(tableNames.toArray()));
+								databaseData.setTableNames(tableNames);
+								response.setSuccess(true);
+								response.setData(databaseData);
+							}
+						} catch (SQLException e) {
+							LOG.error("error [{}]", e);
+							failRequest(response, "An error occured. Contact your administrator if this error persists");
+						}
+					} else {
+						LOG.info("Fail request, database parameter is missing");
+						failRequest(response, "Please fill all required fields");
+					}
 				}
+			} else {
+				LOG.info("No type parameter specified in ");
+				failRequest(response, "No response type set");
 			}
-		} else {
-			LOG.info("No type parameter specified in ");
-			failRequest(response, "No response type set");
+		}else {
+			response.setSuccess(false);
+			response.setMessage("Please login");
 		}
 		return response;
 	}
@@ -216,7 +228,7 @@ public class ViewController {
 
 	public static boolean isEmptyParam(String... params) {
 		for (String param : params) {
-			if (null == param || param.length() < 1 || null == param) {
+			if (null == param || param.length() < 1) {
 				return true;
 			}
 		}

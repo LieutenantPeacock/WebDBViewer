@@ -118,6 +118,20 @@ body, html {
 	font-family: 'Bebas Neue';
 	background-color: #485761;
 	color: white;
+	position: relative;
+}
+
+#view-top .controls {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+#view-top .controls .material-icons {
+	padding: 10px;
+	background-color: white;
+	color: black;
+	cursor:pointer;
 }
 
 .steps {
@@ -132,7 +146,8 @@ body, html {
 	background-color: #485761;
 	display: flex;
 	font-family: 'Bebas Neue';
-	transition:0.5s;
+	transition: 0.5s;
+	z-index:1;
 }
 
 .error-message .error-icon, .error-message .close-icon {
@@ -152,12 +167,87 @@ body, html {
 	padding-left: 15px;
 	border: 2px solid white;
 	border-left: 0px;
-	border-right:0px;
+	border-right: 0px;
 	width: 100%;
 }
-.error-message .close-icon{
-	cursor:pointer;
+
+.error-message .close-icon {
+	cursor: pointer;
 }
-.material-icons{
-	user-select:none;
+
+.material-icons {
+	user-select: none;
+}
+
+.login-modal {
+	width: 500px;
+	height: 400px;
+	background-color: white;
+	box-shadow: 3px 3px black;
+	border-left: 1px solid;
+	border-top: 1px solid;
+	font-family: 'Bebas Neue';
+	display: flex;
+}
+
+.login-modal .login-form {
+	text-align: center;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.login-modal .login-form .login-field {
+	font-family: 'Open Sans';
+	font-size: 20px;
+	padding: 5px;
+	border: none;
+	border-bottom: 2px solid;
+}
+
+.login-modal #login-error {
+	color: red;
+	font-size: 20px;
+	margin: 10px;
+	margin-bottom: 5px;
+}
+
+.login-modal .login-form .login-submit {
+	background-color: #485761;
+	color: white;
+	font-family: 'Bebas Neue';
+	font-size: 25px;
+	margin-top: 10px;
+	padding: 3px 20px;
+}
+
+.login-modal .login-form .loading-layer {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgb(255, 255, 255, 0.8);
+	display: none;
+}
+
+.login-modal .login-form .loading-layer .material-icons {
+	animation: loading 1s infinite;
+	font-size: 40px;
+	background-color: rgb(0, 0, 0, 0.1);
+	border-radius: 50%;
+	padding: 10px;
+}
+
+@keyframes loading {
+	0%{
+		transform: rotate(0deg);
+	}
+	99%{
+		transform:rotate(359deg);
+	}
 }

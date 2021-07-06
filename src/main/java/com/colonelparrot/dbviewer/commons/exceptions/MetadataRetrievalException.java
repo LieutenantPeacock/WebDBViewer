@@ -2,7 +2,7 @@ package com.colonelparrot.dbviewer.commons.exceptions;
 
 /**
  * @author ColonelParrot
- * @version 1.0
+ * @version 1.1
  */
 public class MetadataRetrievalException extends Exception {
 
