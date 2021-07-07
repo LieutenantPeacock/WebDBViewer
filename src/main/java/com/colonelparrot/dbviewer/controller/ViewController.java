@@ -43,7 +43,7 @@ public class ViewController {
 		return c.getConnect();
 	}
 
-	@RequestMapping(value = "/viewer", method = RequestMethod.GET)
+	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String getStuff(Model model, HttpSession session) {
 		final boolean isLoggedIn = null != session.getAttribute("isLoggedIn");
 		if(isLoggedIn) {

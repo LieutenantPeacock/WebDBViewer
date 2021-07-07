@@ -26,9 +26,9 @@ function sendAuthenticationRequest(username, password) {
 		if (this.readyState == 4 && this.status == 200) {
 			const response = this.responseText;
 			setTimeout(function() {
-				loadingLayer.style.display = "none";
 				const JSONResponse = JSON.parse(response);
 				if (JSONResponse.success == true) {
+					loadingLayer.style.display = "none";
 					location = location;
 				} else {
 					errorMessage.textContent = JSONResponse.message;
@@ -37,7 +37,7 @@ function sendAuthenticationRequest(username, password) {
 		}
 		;
 	}
-	xhttp.open("POST", "/login?username=" + username + "&password=" + password,
+	xhttp.open("POST", "/login?username=" + encodeURIComponent(username) + "&password=" + encodeURIComponent(password),
 			true);
 	xhttp.send();
 }
