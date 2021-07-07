@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.colonelparrot.dbviewer.commons.HashEngine;
 import com.colonelparrot.dbviewer.config.LoginResponse;
 
 /**
@@ -70,13 +71,15 @@ public class LoginController {
 				String correctPassword = prop.getProperty(PROP_PASSWORD_KEY);
 				if (correctUsername.equals(username)) {
 					LOG.info("Authentication - Username matches");
-					if (correctPassword.equals(password)) {
+					HashEngine hashEngine = new HashEngine();
+					final String hashedPassword = hashEngine.SHA256(password);
+					if (correctPassword.equals(hashedPassword)) {
 						LOG.info("Authentication - Password matches, successful");
 						return true;
 					} else {
-						LOG.info("Authentication - Password does not match");
+						LOG.info("Authentication - Password does not match. Hashed [{}]", hashedPassword);
 						return false;
-					}
+					}	
 				} else {
 					LOG.info("Authentication - Username does not match");
 					return false;
