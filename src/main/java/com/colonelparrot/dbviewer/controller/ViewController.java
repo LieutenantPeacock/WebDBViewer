@@ -60,7 +60,7 @@ public class ViewController {
 	}
 
 	@ResponseBody
-	@RequestMapping(value = "/viewer", method = RequestMethod.POST)
+	@RequestMapping(value = "/", method = RequestMethod.POST)
 	public QueryResponse getData(@RequestParam(value = "type", required = false) String type,
 			@RequestParam(value = "table", required = false) String table,
 			@RequestParam(value = "database", required = false) String database, Model model,

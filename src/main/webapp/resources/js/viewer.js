@@ -26,7 +26,7 @@ function databaseOptionClickHandler() {
 			databaseDataHandler(this.response);
 		}
 	};
-	xhttp.open("POST", "viewer?type=table&database=" + value, true);
+	xhttp.open("POST", "/?type=table&database=" + value, true);
 	xhttp.send();
 }
 
@@ -52,7 +52,7 @@ function databaseDataHandler(response) {
 						tableDataHandler(this.response);
 					}
 				};
-				xhttp.open("POST", "viewer?type=row&table="
+				xhttp.open("POST", "/?type=row&table="
 						+ value
 						+ "&database="
 						+ databaseSelect.querySelector('.preview')

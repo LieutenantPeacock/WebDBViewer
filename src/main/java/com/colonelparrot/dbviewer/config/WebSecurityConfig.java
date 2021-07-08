@@ -22,7 +22,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/viewer", "/login", "/logout").permitAll().and().csrf().disable().cors();
+		http.authorizeRequests().antMatchers("/", "/login").permitAll().and().csrf().disable().cors().and().antMatcher("/logout").logout().logoutSuccessUrl("/");
 		http.httpBasic().disable();
 	}
 

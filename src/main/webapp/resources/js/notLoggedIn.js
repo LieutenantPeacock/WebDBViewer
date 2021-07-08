@@ -28,11 +28,11 @@ function sendAuthenticationRequest(username, password) {
 			setTimeout(function() {
 				const JSONResponse = JSON.parse(response);
 				if (JSONResponse.success == true) {
-					loadingLayer.style.display = "none";
 					location = location;
 				} else {
 					errorMessage.textContent = JSONResponse.message;
 				}
+				loadingLayer.style.display = "none";
 			}, 1000)
 		}
 		;
