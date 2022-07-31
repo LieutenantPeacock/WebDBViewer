@@ -30,6 +30,9 @@
 						placeholder="Username" required="required" /> <br /> 
 					<input class="login-field" type="password" name="password"
 						placeholder="Password" style="margin-top: 15px" required="required" /> <br />
+					<label style="font-size: 18px; margin-top: 15px; display: inline-block; user-select: none;">
+						<input type="checkbox" name="remember-me"> Keep me logged in
+					</label>
 					<sec:csrfInput/>
 					<p id="login-error"></p>
 					<button class="login-submit">Log In</button>

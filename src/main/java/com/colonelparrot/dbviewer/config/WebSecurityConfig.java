@@ -39,6 +39,7 @@ public class WebSecurityConfig {
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		http.authorizeRequests().anyRequest().authenticated()
 				.and().formLogin().loginPage("/login").permitAll()
+				.and().rememberMe().rememberMeParameter("remember-me")
 				.and().logout()
 				.logoutUrl("/logout").logoutSuccessUrl("/");
 		return http.build();
