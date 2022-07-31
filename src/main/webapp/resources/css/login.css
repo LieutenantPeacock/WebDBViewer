@@ -1,0 +1,80 @@
+.login-modal {
+	width: 500px;
+	height: 400px;
+	background-color: white;
+	box-shadow: 3px 3px black;
+	border-left: 1px solid;
+	border-top: 1px solid;
+	font-family: 'Bebas Neue';
+	display: flex;
+}
+
+.login-modal .login-form {
+	text-align: center;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+}
+
+.login-modal .login-form .login-field {
+	font-family: 'Open Sans';
+	font-size: 20px;
+	padding: 5px;
+	border: none;
+	border-bottom: 2px solid;
+}
+
+.login-modal #login-error {
+	color: red;
+	font-size: 20px;
+	margin: 10px;
+	margin-bottom: 5px;
+}
+
+.login-modal .login-form .login-submit {
+	background-color: #485761;
+	color: white;
+	font-family: 'Bebas Neue';
+	font-size: 25px;
+	margin-top: 10px;
+	padding: 3px 20px;
+}
+
+.login-modal .login-form .loading-layer {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: rgb(255, 255, 255, 0.8);
+	display: none;
+}
+
+.login-modal .login-form .loading-layer .material-icons {
+	animation: loading 1s infinite;
+	font-size: 40px;
+	background-color: rgb(0, 0, 0, 0.1);
+	border-radius: 50%;
+	padding: 10px;
+}
+
+@keyframes loading {
+	0%{
+		transform: rotate(0deg);
+	}
+	99%{
+		transform: rotate(359deg);
+	}
+}
+
+body {
+	background-color: #e6e6fa;
+}
+
+button {
+	cursor: pointer;
+}
