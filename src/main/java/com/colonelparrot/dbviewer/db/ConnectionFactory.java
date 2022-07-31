@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import org.mariadb.jdbc.Driver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,18 +13,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ConnectionFactory {
 	private static final Logger LOG = LoggerFactory.getLogger(ConnectionFactory.class);
-	Connection con;
 
-	public Connection getConnect() {
-		return getConnect("");
+	public static Connection getConnection() {
+		return getConnection("");
 	}
 
-	public Connection getConnect(String databaseName) {
-		try {
-			Class.forName(Driver.class.getName());// "org.mariadb.jdbc.Driver"
-		} catch (Exception e) {
-			LOG.error("Error occured: [{}] ", e);
-		}
+	public static Connection getConnection(final String databaseName) {
+		Connection con = null;
 		try {
 			String url = "jdbc:mariadb://localhost/" + databaseName;
 			String username = "fullviewer";
