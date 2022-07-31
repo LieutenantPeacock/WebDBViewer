@@ -1,12 +1,14 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-	pageEncoding="ISO-8859-1"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="ISO-8859-1">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="_csrf" content="${_csrf.token}"/>
+<meta name="_csrf_header" content="${_csrf.headerName}"/>
 <title>Database Viewer - Grant</title>
 <link rel="stylesheet" href="<c:url value="/resources/css/viewer.css"/>" />
 <link rel="stylesheet" href="<c:url value="/resources/css/icons/icons.css"/>" />
@@ -34,7 +36,7 @@
 							<span class="material-icons" id="logout"> logout </span>
 						</button>
 					</div>
-					<sec:csrfInput></sec:csrfInput>
+					<sec:csrfInput/>
 				</form>
 			</sec:authorize>
 		</div>
