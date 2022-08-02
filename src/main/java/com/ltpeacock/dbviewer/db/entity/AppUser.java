@@ -26,6 +26,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 /**
@@ -48,6 +49,8 @@ public class AppUser {
 	private Instant expiryTime;
 	@OneToMany(mappedBy = "user")
 	private List<Authority> authorities = Arrays.asList(new Authority("ROLE_USER", this));
+	@ManyToMany
+	private List<DBConnectionDef> connections;
 
 	public long getId() {
 		return id;
@@ -103,5 +106,17 @@ public class AppUser {
 
 	public void setAuthorities(List<Authority> authorities) {
 		this.authorities = authorities;
+	}
+
+	public void addAuthority(final String authority) {
+		this.authorities.add(new Authority(authority, this));
+	}
+
+	public List<DBConnectionDef> getConnections() {
+		return connections;
+	}
+
+	public void setConnections(List<DBConnectionDef> connections) {
+		this.connections = connections;
 	}
 }
