@@ -26,4 +26,5 @@ import com.ltpeacock.dbviewer.db.entity.AppUser;
  */
 public interface AppUserRepository extends JpaRepository<AppUser, Long>{
 	AppUser findByUsernameIgnoreCase(String username);
+	AppUser findById(long id);
 }
