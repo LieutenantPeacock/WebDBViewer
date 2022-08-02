@@ -17,16 +17,19 @@
  */
 package com.ltpeacock.dbviewer.service;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
 import com.ltpeacock.dbviewer.commons.SetupInfo;
 import com.ltpeacock.dbviewer.db.entity.AppUser;
+import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
 import com.ltpeacock.dbviewer.form.SetupForm;
 
@@ -54,8 +57,17 @@ public class UserServiceImpl implements UserService {
 			final AppUser user = new AppUser();
 			user.setUsername(form.getUsername());
 			user.setPassword(passwordEncoder.encode(form.getPassword()));
+			user.addAuthority("ROLE_ADMIN");
 			return new AppUserPrincipal(userRepository.save(user));
 		}
 		return null;
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public List<DBConnectionDef> getConnections(final long id) {
+		final AppUser user = userRepository.findById(id);
+		user.getConnections().size(); // trigger initialization
+		return user.getConnections();
 	}
 }

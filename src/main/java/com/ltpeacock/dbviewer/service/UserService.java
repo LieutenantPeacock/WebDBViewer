@@ -17,9 +17,12 @@
  */
 package com.ltpeacock.dbviewer.service;
 
+import java.util.List;
+
 import org.springframework.validation.BindingResult;
 
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
+import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.form.SetupForm;
 
 /**
@@ -27,4 +30,5 @@ import com.ltpeacock.dbviewer.form.SetupForm;
  */
 public interface UserService {
 	AppUserPrincipal createAdmin(SetupForm form, BindingResult result);
+	List<DBConnectionDef> getConnections(long id);
 }
