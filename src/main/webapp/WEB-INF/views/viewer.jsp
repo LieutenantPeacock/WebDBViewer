@@ -62,11 +62,7 @@
 }
 
 #settingsCol {
-	width: 30%;
-	border: 1px solid black;
-	flex-shrink: 0;
-	flex-grow: 0;
-	flex-basis: 30%;
+	min-width: 200px;
 	max-width: 300px;
 	overflow-y: auto;
 }
@@ -83,27 +79,31 @@ html, body {
 	width: 30%;
 	padding: 5px;
 }
+
+#tableContents td {
+	word-break: break-all; /* overflow-wrap: break-word; */
+}
 </style>
 </head>
-<body class="d-flex flex-column">
+<body>
 	<input type="hidden" id="basePath" value="<c:url value="/"/>"/>
-	<div id="header">
-		<h1><a href="<c:url value="/"/>">DB Viewer</a></h1>
-		<p>Lieutenant Peacock</p>
-		<sec:authorize access="isAuthenticated()">
-			<form method="POST" action="<c:url value="/logout"/>" title="Log Out">
-				<div id="logoutControl">
-					<button style="background: transparent; border: none; padding: 0;">
-						<span class="material-icons"> logout </span>
-					</button>
-				</div>
-				<sec:csrfInput />
-			</form>
-		</sec:authorize>
-	</div>
-	<div class="container-fluid flex-fill">
-		<div class="row h-100">
-			<div class="col" id="settingsCol">
+	<div class="container-fluid h-100 d-flex flex-column">
+		<div id="header" class="row flex-shrink-0">
+			<h1><a href="<c:url value="/"/>">DB Viewer</a></h1>
+			<p>Lieutenant Peacock</p>
+			<sec:authorize access="isAuthenticated()">
+				<form method="POST" action="<c:url value="/logout"/>" title="Log Out">
+					<div id="logoutControl">
+						<button style="background: transparent; border: none; padding: 0;">
+							<span class="material-icons"> logout </span>
+						</button>
+					</div>
+					<sec:csrfInput />
+				</form>
+			</sec:authorize>
+		</div>
+		<div class="row flex-grow-1" style="min-height: 0;">
+			<div class="col border mh-100" id="settingsCol">
 				<div id="connectionsContainer">
 					<h2 class="text-primary">Connections</h2>
 					<c:if test="${empty connections}">
@@ -140,7 +140,7 @@ html, body {
 					</div>
 				</template>
 			</div>
-			<div class="col">
+			<div class="col border mh-100" style="overflow: auto;">
 				<c:if test="${tables != null}">
 					<div id="tableSelectContainer" class="d-flex align-items-center">
 						<span class="h4">Table:</span>
