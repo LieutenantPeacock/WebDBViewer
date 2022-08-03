@@ -25,9 +25,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,38 +126,20 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 	}
 
 	private TableData resultSetToTableData(final ResultSet rs) throws SQLException {
-		final TableData tableData = new TableData();
-		final List<Map<Object, Object>> t = new ArrayList<>();
-		List<String> columns = new ArrayList<>();
-		boolean isFirst = true;
+		final List<List<String>> rows = new ArrayList<>();
+		final ResultSetMetaData meta = rs.getMetaData();
+		final int colCount = meta.getColumnCount();
+		final List<String> columnNames = new ArrayList<>(colCount);
+		for(int col = 1; col <= colCount; col++)
+			columnNames.add(meta.getColumnName(col));
 		while (rs.next()) {
-			ResultSetMetaData meta = rs.getMetaData();
-			int colCount = meta.getColumnCount();
-			Map<Object, Object> m = new HashMap<>();
+			final List<String> row = new ArrayList<>(colCount);
 			for (int col = 1; col <= colCount; col++) {
-				/*
-				 * Loop through all columns
-				 */
-				Object value = rs.getObject(col);
-				if (value != null) {
-					final String columnName = meta.getColumnName(col);
-					if (isFirst) {
-						/*
-						 * If it's the first loop cycle, also add to columns list to spare 1 loop cycle
-						 */
-						columns.add(columnName);
-					}
-					final String columnValue = String.valueOf(rs.getObject(col));
-					m.put(columnName, columnValue);
-				}
+				final Object value = rs.getObject(col);
+				row.add(String.valueOf(value));
 			}
-			if (isFirst) {
-				isFirst = false;
-			}
-			t.add(m);
+			rows.add(row);
 		}
-		tableData.setRows(t);
-		tableData.setColumns(columns);
-		return tableData;
+		return new TableData(columnNames, rows);
 	}
 }
