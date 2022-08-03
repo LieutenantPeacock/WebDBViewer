@@ -17,10 +17,13 @@
  */
 package com.ltpeacock.dbviewer.config;
 
+import java.util.Optional;
+
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,8 +38,10 @@ public class DataSourceConfig {
 	private static final Logger LOG = LoggerFactory.getLogger(DataSourceConfig.class);
 
 	@Bean
-	public DataSource dataSource(final AppProperties appProps) {
-		LOG.info("DataSourceConfig called");
-		return DataSourceBuilder.create().url("jdbc:h2:file:" + appProps.getDbDir()).build();
+	public DataSource dataSource(final AppProperties appProps, 
+			final @Value("${spring.datasource.url:#{null}}") Optional<String> dataSourceURL) {
+		return DataSourceBuilder.create().url(dataSourceURL.orElse("jdbc:h2:file:" + appProps.getDbDir()))
+				.username("sa").password("h2password")
+				.build();
 	}
 }
