@@ -52,17 +52,27 @@
 	color: black;
 }
 
-#connections {
+#settingsCol {
 	width: 30%;
 	border: 1px solid black;
 	flex-shrink: 0;
 	flex-grow: 0;
 	flex-basis: 30%;
 	max-width: 300px;
+	overflow-y: auto;
 }
 
 html, body {
 	height: 100%;
+}
+
+#connectionsContainer > .card.active {
+	background-color: #0cf74b;
+}
+
+#tableSelectContainer {
+	width: 30%;
+	padding: 5px;
 }
 </style>
 </head>
@@ -82,20 +92,57 @@ html, body {
 			</form>
 		</sec:authorize>
 	</div>
-	<div class="container-fluid flex-fill" style="overflow-y: auto;">
+	<div class="container-fluid flex-fill">
 		<div class="row h-100">
-			<div class="col" id="connections">
-				<h2 class="text-primary">Connections</h2>
-				<c:if test="${empty connections}">
-					<span style="font-weight: bold;">Currently no connections!</span>
-				</c:if>
-				<sec:authorize access="hasRole('ADMIN')">
-					<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newConnectionModal">
-						Add New Connection
-					</button>
-				</sec:authorize>
+			<div class="col" id="settingsCol">
+				<div id="connectionsContainer">
+					<h2 class="text-primary">Connections</h2>
+					<c:if test="${empty connections}">
+						<span style="font-weight: bold;" id="noConnections">Currently no connections!</span>
+					</c:if>
+					<sec:authorize access="hasRole('ADMIN')">
+						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newConnectionModal">
+							Add New Connection
+						</button>
+					</sec:authorize>
+					<c:forEach items="${connections}" var="connection">
+						<div class="card mt-3 ${connection.id == param.connection ? 'active' : ''}">
+						  <div class="card-body">
+						    <h5 class="card-title">${connection.url} with username [${connection.username}]</h5>
+						    <p class="card-text">
+						    	<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
+						    	<strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}
+						    </p>
+						    <a href="<c:url value="/?connection=${connection.id}"/>" class="btn btn-primary">Open Connection</a>
+						  </div>
+						</div>
+					</c:forEach>
+				</div>
+				<template id="connectionTemplate">
+					<div class="card mt-3">
+					  <div class="card-body">
+					    <h5 class="card-title">${connection.url} with username [${connection.username}]</h5>
+					    <p class="card-text">
+					    	<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
+					    	<strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}
+					    </p>
+					    <a href="<c:url value="/?connection=${connection.id}"/>" class="btn btn-primary">Open Connection</a>
+					  </div>
+					</div>
+				</template>
 			</div>
-			<div class="col"></div>
+			<div class="col" style="position: relative;">
+				<c:if test="${tables != null}">
+					<div id="tableSelectContainer" class="d-flex align-items-center">
+						<span class="h4">Table:</span>
+						<select class="form-select" id="tableSelect" style="margin-left: 5px;">
+							<c:forEach items="${tables}" var="table">
+								<option value="${table}">${table}</option>
+							</c:forEach>
+						</select>
+					</div>
+				</c:if>
+			</div>
 		</div>
 	</div>
 	<sec:authorize access="hasRole('ADMIN')">
@@ -118,10 +165,12 @@ html, body {
 					  <div class="mb-3">
 					    <label for="connection_username" class="form-label">Username</label>
 					    <input type="text" class="form-control" id="connection_username" name="username"/>
+					  	<div class="invalid-feedback"></div>
 					  </div>
 					  <div class="mb-3">
 					    <label for="connection_password" class="form-label">Password</label>
 					    <input type="password" class="form-control" id="connection_password" name="password"/>
+					    <div class="invalid-feedback"></div>
 					  </div>
 					  <hr/>
 					  <div>
@@ -131,6 +180,7 @@ html, body {
 					  			<option value="${driver}">${driver}</option>
 					  		</c:forEach>
 					  	</select>
+					  	<div class="invalid-feedback"></div>
 					  	<div class="invalid-feedback" id="driverPathError">Please select the JDBC Driver Location.</div>
 					  	<div id="driverUploadContainer">
 					  	<label for="driverUpload" class="form-label">Or Upload New Driver (one or more JAR files)</label>
@@ -147,6 +197,7 @@ html, body {
 					  	<label for="connection_driverName" class="form-label">Driver Name</label>
 					  	<select class="form-select" id="connection_driverName" name="driverName" required>
 					  	</select>
+					  	<div class="invalid-feedback"></div>
 					  </div>
 					  <div class="mt-3 text-danger" id="connectionFormError"></div>
 					 </form>
