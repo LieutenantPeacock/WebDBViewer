@@ -20,10 +20,14 @@ package com.ltpeacock.dbviewer.service;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +36,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
+import com.colonelparrot.dbviewer.config.TableData;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerAccessNotAllowedException;
+import com.ltpeacock.dbviewer.commons.exceptions.DBViewerResourceNotFoundException;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerRuntimeException;
 import com.ltpeacock.dbviewer.commons.exceptions.ErrorCode;
 import com.ltpeacock.dbviewer.db.CustomDriverManager;
@@ -74,18 +80,23 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 		return new MappedErrorsResponse<>(Util.toErrorMap(result));
 	}
 
+	private DBConnectionDef getDef(final long connectionId, final long userId) {
+		final DBConnectionDef def = this.dbConnectionDefRepository.findById(connectionId);
+		if (def == null)
+			throw new DBViewerResourceNotFoundException();
+		if (def.getUsers().stream().noneMatch(user -> user.getId() == userId))
+			throw new DBViewerAccessNotAllowedException();
+		return def;
+	}
+
 	@Transactional
 	@Override
 	public List<String> getTables(final long connectionId, final long userId) {
-		final DBConnectionDef def = this.dbConnectionDefRepository.findById(connectionId);
-		if (def == null)
-			return null;
-		if (def.getUsers().stream().noneMatch(user -> user.getId() == userId))
-			throw new DBViewerAccessNotAllowedException();
+		final DBConnectionDef def = getDef(connectionId, userId);
 		final List<String> tableNames = new ArrayList<>();
 		try (Connection con = driverManager.getConnection(def);) {
 			final DatabaseMetaData md = con.getMetaData();
-			try (ResultSet rs = md.getTables(con.getCatalog(), con.getSchema(), "%", new String[] {"TABLE"});) {
+			try (ResultSet rs = md.getTables(con.getCatalog(), con.getSchema(), "%", new String[] { "TABLE" });) {
 				while (rs.next()) {
 					tableNames.add(rs.getString(3));
 				}
@@ -94,5 +105,61 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 		} catch (SQLException e) {
 			throw new DBViewerRuntimeException(ErrorCode.TABLES_RETRIEVAL_EXCEPTION, e);
 		}
+	}
+
+	@Transactional
+	@Override
+	public TableData getTableContents(final long connectionId, final long userId, final String tableName) {
+		final DBConnectionDef def = getDef(connectionId, userId);
+		try (Connection con = driverManager.getConnection(def)) {
+			final DatabaseMetaData md = con.getMetaData();
+			try (ResultSet rs = md.getTables(con.getCatalog(), con.getSchema(), tableName, new String[] { "TABLE" })) {
+				if (!rs.next())
+					throw new DBViewerResourceNotFoundException();
+			}
+			final String quote = md.getIdentifierQuoteString();
+			try (Statement statement = con.createStatement();
+					ResultSet rs = statement.executeQuery("select * from " + quote + tableName + quote)) {
+				return resultSetToTableData(rs);
+			}
+		} catch (SQLException e) {
+			throw new DBViewerRuntimeException(ErrorCode.TABLE_CONTENT_RETRIEVAL_EXCEPTION, e);
+		}
+	}
+
+	private TableData resultSetToTableData(final ResultSet rs) throws SQLException {
+		final TableData tableData = new TableData();
+		final List<Map<Object, Object>> t = new ArrayList<>();
+		List<String> columns = new ArrayList<>();
+		boolean isFirst = true;
+		while (rs.next()) {
+			ResultSetMetaData meta = rs.getMetaData();
+			int colCount = meta.getColumnCount();
+			Map<Object, Object> m = new HashMap<>();
+			for (int col = 1; col <= colCount; col++) {
+				/*
+				 * Loop through all columns
+				 */
+				Object value = rs.getObject(col);
+				if (value != null) {
+					final String columnName = meta.getColumnName(col);
+					if (isFirst) {
+						/*
+						 * If it's the first loop cycle, also add to columns list to spare 1 loop cycle
+						 */
+						columns.add(columnName);
+					}
+					final String columnValue = String.valueOf(rs.getObject(col));
+					m.put(columnName, columnValue);
+				}
+			}
+			if (isFirst) {
+				isFirst = false;
+			}
+			t.add(m);
+		}
+		tableData.setRows(t);
+		tableData.setColumns(columns);
+		return tableData;
 	}
 }
