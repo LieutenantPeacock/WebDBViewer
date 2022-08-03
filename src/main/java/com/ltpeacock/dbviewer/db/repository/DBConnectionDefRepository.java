@@ -25,5 +25,5 @@ import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
  * @author LieutenantPeacock
  */
 public interface DBConnectionDefRepository extends JpaRepository<DBConnectionDef, Long> {
-
+	DBConnectionDef findById(long id);
 }
