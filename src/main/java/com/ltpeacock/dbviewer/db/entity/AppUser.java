@@ -18,9 +18,11 @@
 package com.ltpeacock.dbviewer.db.entity;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -47,9 +49,9 @@ public class AppUser {
 	private boolean locked = false;
 	@Column
 	private Instant expiryTime;
-	@OneToMany(mappedBy = "user")
-	private List<Authority> authorities = Arrays.asList(new Authority("ROLE_USER", this));
-	@ManyToMany
+	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
+	private List<Authority> authorities = new ArrayList<>(Arrays.asList(new Authority("ROLE_USER", this)));
+	@ManyToMany(mappedBy = "users")
 	private List<DBConnectionDef> connections;
 
 	public long getId() {
