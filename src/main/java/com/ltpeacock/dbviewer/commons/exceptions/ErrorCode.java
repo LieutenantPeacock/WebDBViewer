@@ -22,7 +22,9 @@ package com.ltpeacock.dbviewer.commons.exceptions;
  */
 public enum ErrorCode {
 	DRIVER_INITIALIZATION_ERROR("001", "Could not initialize Driver from JAR."),
-	CONNECTION_FAILED("002", "Could not use specified Driver to connect to JDBC URL");
+	CONNECTION_FAILED("002", "Could not use specified Driver to connect to JDBC URL"),
+	TABLE_RETRIEVAL_EXCEPTION("003", "Could not load tables in database."),
+	ACCESS_NOT_ALLOWED("004", "Access to certain resource/endpoint is not allowed for the current user.");
 	
 	private final String code;
 	private final String message;
