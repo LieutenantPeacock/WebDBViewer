@@ -1,5 +1,7 @@
 package com.colonelparrot.dbviewer.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -13,21 +15,35 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.colonelparrot.dbviewer.commons.exceptions.TableRetrievalException;
 import com.colonelparrot.dbviewer.config.DatabaseData;
 import com.colonelparrot.dbviewer.config.QueryResponse;
 import com.colonelparrot.dbviewer.config.TableData;
 import com.colonelparrot.dbviewer.db.ConnectionFactory;
+import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
+import com.ltpeacock.dbviewer.db.DriverVO;
+import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
+import com.ltpeacock.dbviewer.form.ConnectionForm;
+import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
+import com.ltpeacock.dbviewer.service.DBConnectionService;
+import com.ltpeacock.dbviewer.service.DriversService;
+import com.ltpeacock.dbviewer.service.UserService;
 
 /**
  * @author ColonelParrot
@@ -37,18 +53,40 @@ import com.colonelparrot.dbviewer.db.ConnectionFactory;
 public class ViewController {
 	private static final String INVALID_FIELD_VALUE = "Invalid field value";
 	private static final Logger LOG = LoggerFactory.getLogger(ViewController.class);
+	@Autowired
+	private UserService userService;
+	@Autowired
+	private DriversService driversService;
+	@Autowired
+	private DBConnectionService dbConnectionService;
 
 	@GetMapping("/")
-	public String getStuff(Model model, HttpSession session) {
-		final Connection con = ConnectionFactory.getConnection();
-		List<String> databaseNames;
-		try {
-			databaseNames = getDatabases(con);
-			model.addAttribute("databases", databaseNames);
-		} catch (Exception e) {
-			LOG.error("error", e);
-		}
+	public String getStuff(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal) {
+		model.addAttribute("connections", userService.getConnections(principal.getId()));
+		model.addAttribute("drivers", driversService.getDriverPaths());
 		return "viewer";
+	}
+	
+	@PostMapping("/uploadDriver")
+	@Secured("ROLE_ADMIN")
+	@ResponseBody
+	public MappedErrorsResponse<String> uploadDriver(final MultipartFile[] files, @RequestParam final String folder) {
+		LOG.info("Uploaded {} files", files.length);
+		return this.driversService.uploadDriver(files, folder);
+	}
+	
+	@GetMapping("/getDrivers")
+	@Secured("ROLE_ADMIN")
+	@ResponseBody
+	public List<DriverVO> getDrivers(@RequestParam final String driverPath) throws IOException {
+		return this.driversService.getDrivers(new File(driverPath));
+	}
+	
+	@PostMapping("/newConnection")
+	@Secured("ROLE_ADMIN")
+	@ResponseBody
+	public MappedErrorsResponse<DBConnectionDefDTO> newConnection(@Valid final ConnectionForm form, final BindingResult result, @AuthenticationPrincipal final AppUserPrincipal principal) {
+		return this.dbConnectionService.createConnection(form, result, principal.getId());
 	}
 
 	@ResponseBody
@@ -253,5 +291,4 @@ public class ViewController {
 		}
 		return databaseNames;
 	}
-
 }
