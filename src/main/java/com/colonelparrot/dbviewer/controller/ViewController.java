@@ -68,6 +68,8 @@ public class ViewController {
 			if(connection != null) {
 				final long connectionId = Long.parseLong(connection);
 				model.addAttribute("tables", dbConnectionService.getTables(connectionId, principal.getId()));
+				if (table != null)
+					model.addAttribute("tableContents", dbConnectionService.getTableContents(connectionId, principal.getId(), table));
 			} else if (table != null) {
 				return "redirect:/";
 			}
@@ -227,7 +229,7 @@ public class ViewController {
 	}
 
 	public TableData resultSetToTableData(ResultSet rs) throws SQLException {
-		TableData tableData = new TableData();
+//		TableData tableData = new TableData();
 		List<Map<Object, Object>> t = new ArrayList<>();
 		List<String> columns = new ArrayList<>();
 		boolean isFirst = true;
@@ -257,10 +259,10 @@ public class ViewController {
 			}
 			t.add(m);
 		}
-		tableData.setRows(t);
-		tableData.setColumns(columns);
-		return tableData;
-
+//		tableData.setRows(t);
+//		tableData.setColumns(columns);
+//		return tableData;
+		return null;
 	}
 
 	public static boolean isEmptyParam(final String... params) {

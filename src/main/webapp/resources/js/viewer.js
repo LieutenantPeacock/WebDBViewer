@@ -40,6 +40,16 @@
 			}
 		}
 	});
+	const tableSelect = document.getElementById('tableSelect');
+	if (tableSelect) {
+		if (!tableSelect.querySelector('option[selected]'))
+			tableSelect.selectedIndex = -1;
+		tableSelect.addEventListener('change', function(e){
+			const params = new URLSearchParams(location.search);
+			params.set('table', this.value);
+			location.search = params;
+		});
+	}
 	const driverUploadContainer = document.getElementById('driverUploadContainer');
 	const driverUpload = document.getElementById('driverUpload');
 	const driverUploadError = document.getElementById('driverUploadError');

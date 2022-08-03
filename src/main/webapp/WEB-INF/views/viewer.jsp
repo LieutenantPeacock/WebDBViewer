@@ -1,8 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@ taglib prefix="sec"
-	uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -141,16 +140,36 @@ html, body {
 					</div>
 				</template>
 			</div>
-			<div class="col" style="position: relative;">
+			<div class="col">
 				<c:if test="${tables != null}">
 					<div id="tableSelectContainer" class="d-flex align-items-center">
 						<span class="h4">Table:</span>
 						<select class="form-select" id="tableSelect" style="margin-left: 5px;">
 							<c:forEach items="${tables}" var="table">
-								<option value="${table}">${table}</option>
+								<option value="${table}" ${table == param.table ? 'selected': ''}>${table}</option>
 							</c:forEach>
 						</select>
 					</div>
+				</c:if>
+				<c:if test="${tableContents != null}">
+					<table class="table table-bordered table-hover" id="tableContents">
+						<thead>
+							<tr>
+								<c:forEach var="column" items="${tableContents.columnNames}">
+									<th scope="col">${column}</th>
+								</c:forEach>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach var="row" items="${tableContents.rows}">
+								<tr>
+									<c:forEach var="val" items="${row}">
+										<td>${val}</td>
+									</c:forEach>
+								</tr>
+							</c:forEach>
+						</tbody>
+					</table>
 				</c:if>
 			</div>
 		</div>
