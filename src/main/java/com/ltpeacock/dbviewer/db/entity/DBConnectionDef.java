@@ -19,6 +19,7 @@ package com.ltpeacock.dbviewer.db.entity;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -44,7 +45,7 @@ public class DBConnectionDef {
 	private String username;
 	@Column(length = 500)
 	private String password;
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.MERGE)
 	private List<AppUser> users;
 
 	public long getId() {
