@@ -40,6 +40,7 @@ import com.ltpeacock.dbviewer.commons.exceptions.DBViewerResourceNotFoundExcepti
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerRuntimeException;
 import com.ltpeacock.dbviewer.commons.exceptions.ErrorCode;
 import com.ltpeacock.dbviewer.db.CustomDriverManager;
+import com.ltpeacock.dbviewer.db.TableColumn;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
@@ -129,9 +130,11 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 		final List<List<String>> rows = new ArrayList<>();
 		final ResultSetMetaData meta = rs.getMetaData();
 		final int colCount = meta.getColumnCount();
-		final List<String> columnNames = new ArrayList<>(colCount);
-		for(int col = 1; col <= colCount; col++)
-			columnNames.add(meta.getColumnName(col));
+		final List<TableColumn> columns = new ArrayList<>(colCount);
+		for(int col = 1; col <= colCount; col++) {
+			columns.add(new TableColumn(meta.getColumnName(col), 
+					meta.getColumnTypeName(col), meta.getColumnDisplaySize(col)));
+		}
 		while (rs.next()) {
 			final List<String> row = new ArrayList<>(colCount);
 			for (int col = 1; col <= colCount; col++) {
@@ -140,6 +143,6 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			}
 			rows.add(row);
 		}
-		return new TableData(columnNames, rows);
+		return new TableData(columns, rows);
 	}
 }

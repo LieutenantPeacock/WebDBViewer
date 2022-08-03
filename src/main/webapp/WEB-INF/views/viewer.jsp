@@ -155,8 +155,8 @@ html, body {
 					<table class="table table-bordered table-hover" id="tableContents">
 						<thead>
 							<tr>
-								<c:forEach var="column" items="${tableContents.columnNames}">
-									<th scope="col">${column}</th>
+								<c:forEach var="column" items="${tableContents.columns}">
+									<th scope="col" title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</th>
 								</c:forEach>
 							</tr>
 						</thead>
