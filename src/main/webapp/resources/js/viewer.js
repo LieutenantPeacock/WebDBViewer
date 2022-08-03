@@ -2,7 +2,7 @@
 	const csrfToken = document.querySelector("meta[name='_csrf']").content;
 	const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 	const basePath = document.getElementById('basePath').value;
-	document.querySelector('#connectionsContainer > .card.active')?.scrollIntoView();
+	document.querySelector('#connectionsContainer > .card.active')?.scrollIntoView(false);
 	function _fetch(resource, options) {
 		return fetch(resource, {...options, headers: {...options?.headers, [csrfHeader]: csrfToken}})
 				.then(res => {
@@ -12,6 +12,8 @@
 	}
 	const connectionFormError = document.getElementById('connectionFormError');
 	const newConnectionModal = document.getElementById('newConnectionModal');
+	const noConnections = document.getElementById('noConnections');
+	const connectionsContainer = document.getElementById('connectionsContainer');
 	let processing = false;
 	document.getElementById('newConnectionForm').addEventListener('submit', function(e){
 		e.preventDefault();
@@ -30,13 +32,15 @@
 							connectionEl.querySelector('.card-text').innerHTML
 								= `Driver Path: ${data.value.driverPath}<br/>Driver Class Name: ${data.value.driverName}`;
 							connectionEl.querySelector('a').href = basePath + `?connection=${data.value.id}`;
-							document.getElementById('noConnections').style.display = 'none';
+							if(noConnections) noConnections.style.display = 'none';
+							connectionsContainer.appendChild(connectionEl);
 						} else {
 							showErrors(data.errors, 'connection_');
 						}
 					}).catch(error => {
+						console.error(error);
 						connectionFormError.textContent = 'An error occurred.';
-					}).finally(()=>processing = false);
+					}).finally(()=> processing = false);
 			}
 		}
 	});
