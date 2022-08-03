@@ -17,6 +17,8 @@
  */
 package com.ltpeacock.dbviewer.service;
 
+import java.util.List;
+
 import org.springframework.validation.BindingResult;
 
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
@@ -29,4 +31,5 @@ import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
 public interface DBConnectionService {
 	MappedErrorsResponse<DBConnectionDefDTO> createConnection(final ConnectionForm form, 
 			final BindingResult result, final long userId);
+	List<String> getTables(final long connectionId, final long userId);
 }
