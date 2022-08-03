@@ -2,6 +2,7 @@
 	const csrfToken = document.querySelector("meta[name='_csrf']").content;
 	const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 	const basePath = document.getElementById('basePath').value;
+	document.querySelector('#connectionsContainer > .card.active')?.scrollIntoView();
 	function _fetch(resource, options) {
 		return fetch(resource, {...options, headers: {...options?.headers, [csrfHeader]: csrfToken}})
 				.then(res => {
@@ -21,8 +22,18 @@
 			if (this.checkValidity()) {
 				_fetch(basePath + 'newConnection', {method: 'POST', body: new FormData(this)})
 					.then(data => {
-						bootstrap.Modal.getInstance(newConnectionModal).hide();
-						console.log(data);
+						if(data.success) {
+							bootstrap.Modal.getInstance(newConnectionModal).hide();
+							const connectionEl = connectionTemplate.content.cloneNode(true);
+							connectionEl.querySelector('.card-title')
+								.textContent = `${data.value.url} with username [${data.value.username}]`;
+							connectionEl.querySelector('.card-text').innerHTML
+								= `Driver Path: ${data.value.driverPath}<br/>Driver Class Name: ${data.value.driverName}`;
+							connectionEl.querySelector('a').href = basePath + `?connection=${data.value.id}`;
+							document.getElementById('noConnections').style.display = 'none';
+						} else {
+							showErrors(data.errors, 'connection_');
+						}
 					}).catch(error => {
 						connectionFormError.textContent = 'An error occurred.';
 					}).finally(()=>processing = false);
@@ -45,6 +56,14 @@
 	driverFolderName.addEventListener('input', function(e){
 		this.classList.remove('is-invalid');
 	})
+	function showErrors(errors, idPrefix = '') {
+		for (const [inputName, error] of Object.entries(errors)) {
+			const input = document.getElementById(idPrefix + inputName);
+			if (input.nextElementSibling && input.nextElementSibling.matches('.invalid-feedback')) 
+				input.nextElementSibling.textContent = error;
+			input.classList.add('is-invalid');
+		}
+	}
 	document.getElementById('driverUploadBtn').addEventListener('click', function(e){
 		driverUploadContainer.querySelectorAll('.is-invalid')
 				.forEach(el => el.classList.remove('is-invalid'));
@@ -58,11 +77,7 @@
 				method: 'POST',
 				body: data
 			}).then(data => {
-				for (const [inputId, error] of Object.entries(data.errors)) {
-					const input = driverUploadContainer.querySelector('#' + inputId);
-					input.nextElementSibling.textContent = error;
-					input.classList.add('is-invalid');
-				}
+				showErrors(data.errors);
 				if (data.success) {
 					driverPathSelect.add(new Option(data.value));
 					driverPathSelect.value = data.value;
