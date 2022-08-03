@@ -25,7 +25,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "dbviewer")
 public class AppProperties {
 	private String appRoot = ".dbviewer";
-	private String dbDir = "./" + appRoot + "/db";
+	private String dbDir = "./" + appRoot + "/db"; // implicit relative paths not allowed by H2
+	private String driversDir = appRoot + "/ext/drivers";
 
 	public String getAppRoot() {
 		return appRoot;
@@ -41,5 +42,13 @@ public class AppProperties {
 
 	public void setDbDir(String dbDir) {
 		this.dbDir = dbDir;
+	}
+
+	public String getDriversDir() {
+		return driversDir;
+	}
+
+	public void setDriversDir(String driversDir) {
+		this.driversDir = driversDir;
 	}
 }
