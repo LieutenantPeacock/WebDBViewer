@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.ltpeacock.dbviewer.commons.exceptions.DBViewerRuntimeException;
+import com.ltpeacock.dbviewer.commons.exceptions.ErrorCode;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.service.DriversService;
 
@@ -59,20 +61,16 @@ public class CustomDriverManager {
 			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
 					| ClassNotFoundException | IOException e) {
 				LOG.error("Could not load Driver [{}] from path [{}]", driverClassName, driverPath);
-				LOG.error("Exception", e);
+				throw new DBViewerRuntimeException(ErrorCode.DRIVER_INITIALIZATION_ERROR, e);
 			}
-			return null;
 		});
-		if (driver == null)
-			return null;
 		try {
 			final Properties props = new Properties();
 			props.put("user", username);
 			props.put("password", password);
 			return driver.connect(url, props);
 		} catch (SQLException e) {
-			LOG.error("SQLException while getting connection", e);
-			return null;
+			throw new DBViewerRuntimeException(ErrorCode.CONNECTION_FAILED, e);
 		}
 	}
 }
