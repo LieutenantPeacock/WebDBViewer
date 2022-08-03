@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
-import com.colonelparrot.dbviewer.config.TableData;
+import com.colonelparrot.dbviewer.db.TableData;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerAccessNotAllowedException;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerResourceNotFoundException;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerRuntimeException;

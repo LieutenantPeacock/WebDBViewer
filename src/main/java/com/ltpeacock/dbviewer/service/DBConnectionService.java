@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.springframework.validation.BindingResult;
 
-import com.colonelparrot.dbviewer.config.TableData;
+import com.colonelparrot.dbviewer.db.TableData;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;

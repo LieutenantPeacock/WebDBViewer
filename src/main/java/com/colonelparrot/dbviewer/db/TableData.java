@@ -1,4 +1,4 @@
-package com.colonelparrot.dbviewer.config;
+package com.colonelparrot.dbviewer.db;
 
 import java.util.List;
 
