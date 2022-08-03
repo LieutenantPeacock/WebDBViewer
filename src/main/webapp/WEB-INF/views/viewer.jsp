@@ -39,6 +39,16 @@
 	font-style: italic;
 }
 
+#header a {
+	color: inherit;
+	text-decoration: none;
+}
+
+#header a:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
 #logoutControl {
 	position: absolute;
 	top: 0;
@@ -79,7 +89,7 @@ html, body {
 <body class="d-flex flex-column">
 	<input type="hidden" id="basePath" value="<c:url value="/"/>"/>
 	<div id="header">
-		<h1>DB Viewer</h1>
+		<h1><a href="<c:url value="/"/>">DB Viewer</a></h1>
 		<p>Lieutenant Peacock</p>
 		<sec:authorize access="isAuthenticated()">
 			<form method="POST" action="<c:url value="/logout"/>" title="Log Out">
