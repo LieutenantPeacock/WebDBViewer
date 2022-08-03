@@ -61,7 +61,19 @@ public class ViewController {
 	private DBConnectionService dbConnectionService;
 
 	@GetMapping("/")
-	public String getStuff(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal) {
+	public String getStuff(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
+			final @RequestParam(required = false) String connection,
+			final @RequestParam(required = false) String table) {
+		try {
+			if(connection != null) {
+				final long connectionId = Long.parseLong(connection);
+				model.addAttribute("tables", dbConnectionService.getTables(connectionId, principal.getId()));
+			} else if (table != null) {
+				return "redirect:/";
+			}
+		} catch(NumberFormatException e) {
+			return "redirect:/";
+		}
 		model.addAttribute("connections", userService.getConnections(principal.getId()));
 		model.addAttribute("drivers", driversService.getDriverPaths());
 		return "viewer";
