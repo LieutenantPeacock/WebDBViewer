@@ -92,7 +92,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			}
 			return tableNames;
 		} catch (SQLException e) {
-			throw new DBViewerRuntimeException(ErrorCode.TABLE_RETRIEVAL_EXCEPTION, e);
+			throw new DBViewerRuntimeException(ErrorCode.TABLES_RETRIEVAL_EXCEPTION, e);
 		}
 	}
 }
