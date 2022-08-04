@@ -31,6 +31,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import com.ltpeacock.dbviewer.commons.RoleNames;
+
 /**
  * @author LieutenantPeacock
  */
@@ -50,7 +52,7 @@ public class AppUser {
 	@Column
 	private Instant expiryTime;
 	@OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST)
-	private List<Authority> authorities = new ArrayList<>(Arrays.asList(new Authority("ROLE_USER", this)));
+	private List<Authority> authorities = new ArrayList<>(Arrays.asList(new Authority(RoleNames.USER, this)));
 	@ManyToMany(mappedBy = "users")
 	private List<DBConnectionDef> connections;
 
