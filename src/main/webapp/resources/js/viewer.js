@@ -126,4 +126,41 @@
 		});
 	}
 	driverPathSelect.addEventListener('change', onDriverPathChange);
+	const statementMessage = document.getElementById('statementMessage');
+	const tableContents = document.getElementById('tableContents');
+	document.getElementById('statementForm').addEventListener('submit', function(e){
+		e.preventDefault();
+		statementMessage.textContent = '';
+		statementMessage.classList.remove('text-danger');
+		const data = new FormData(this);
+		data.append('connection', new URLSearchParams(location.search).get('connection'));
+		_fetch(basePath + 'execute', {
+			method: 'POST', body: data
+		}).then(data => {
+			if (data.errorMessage) {
+				statementMessage.classList.add('text-danger');
+				statementMessage.textContent = data.errorMessage;
+			} else if(data.value.results){
+				const tableData = data.value.results;
+				tableContents.innerHTML = 
+`<thead>
+	<tr>
+		${tableData.columns.map(column => 
+			`<th scope="col" title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</th>`)
+			.join('')}
+	</tr>
+</thead>
+<tbody>
+	${tableData.rows.map(row => "<tr>" + 
+		row.map(val => "<td>" + val + "</td>").join('')
+		+ "</tr>").join('')}
+</tbody>`;
+			} else {
+				statementMessage.textContent = 'Updated ' + data.value.updateCount + ' rows.';
+			}
+		}).catch(error => {
+			statementMessage.classList.add('text-danger');
+			statementMessage.textContent = 'An error occurred.';
+		});
+	});
 })();

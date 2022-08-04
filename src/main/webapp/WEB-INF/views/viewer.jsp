@@ -76,7 +76,6 @@ html, body {
 }
 
 #tableSelectContainer {
-	width: 30%;
 	padding: 5px;
 }
 
@@ -142,17 +141,34 @@ html, body {
 			</div>
 			<div class="col border mh-100" style="overflow: auto;">
 				<c:if test="${tables != null}">
-					<div id="tableSelectContainer" class="d-flex align-items-center">
-						<span class="h4">Table:</span>
-						<select class="form-select" id="tableSelect" style="margin-left: 5px;">
-							<c:forEach items="${tables}" var="table">
-								<option value="${table}" ${table == param.table ? 'selected': ''}>${table}</option>
-							</c:forEach>
-						</select>
+					<div id="tableSelectContainer" class="row">
+						<div class="col-auto" style="min-width: 150px;">
+							<div class="form-floating">
+								<select class="form-select" id="tableSelect">
+									<c:forEach items="${tables}" var="table">
+										<option value="${table}" ${table == param.table ? 'selected': ''}>${table}</option>
+									</c:forEach>
+								</select>
+								<label for="tableSelect">Table</label>
+							</div>
+						</div>
+						<div class="col">
+							<form id="statementForm">
+								<div class="input-group mb-3">
+								  <div class="form-floating">
+								      <textarea class="form-control" id="statementTextarea" 
+								      	name="statement" placeholder="select * from ${param.table};"></textarea>
+								      <label for="statementTextarea">Enter SQL Statement</label>
+								  </div>
+								  <button class="btn btn-outline-secondary">Execute</button>
+								</div>
+							</form>
+						</div>
 					</div>
 				</c:if>
-				<c:if test="${tableContents != null}">
-					<table class="table table-bordered table-hover" id="tableContents">
+				<div class="text-center" id="statementMessage"></div>
+				<table class="table table-bordered table-hover" id="tableContents">
+					<c:if test="${tableContents != null}">
 						<thead>
 							<tr>
 								<c:forEach var="column" items="${tableContents.columns}">
@@ -169,8 +185,8 @@ html, body {
 								</tr>
 							</c:forEach>
 						</tbody>
-					</table>
-				</c:if>
+					</c:if>
+				</table>
 			</div>
 		</div>
 	</div>

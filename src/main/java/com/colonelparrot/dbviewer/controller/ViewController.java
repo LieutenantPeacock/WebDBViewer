@@ -22,9 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
 import com.ltpeacock.dbviewer.db.DriverVO;
+import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
+import com.ltpeacock.dbviewer.response.SimpleResponse;
 import com.ltpeacock.dbviewer.service.DBConnectionService;
 import com.ltpeacock.dbviewer.service.DriversService;
 import com.ltpeacock.dbviewer.service.UserService;
@@ -74,7 +76,6 @@ public class ViewController {
 	}
 	
 	@GetMapping("/getDrivers")
-	@Secured("ROLE_ADMIN")
 	@ResponseBody
 	public List<DriverVO> getDrivers(@RequestParam final String driverPath) throws IOException {
 		return this.driversService.getDrivers(new File(driverPath));
@@ -85,5 +86,13 @@ public class ViewController {
 	@ResponseBody
 	public MappedErrorsResponse<DBConnectionDefDTO> newConnection(@Valid final ConnectionForm form, final BindingResult result, @AuthenticationPrincipal final AppUserPrincipal principal) {
 		return this.dbConnectionService.createConnection(form, result, principal.getId());
+	}
+	
+	@PostMapping("/execute")
+	@ResponseBody
+	public SimpleResponse<QueryResult> execute(final @RequestParam String statement,
+			final @RequestParam long connection,
+			@AuthenticationPrincipal final AppUserPrincipal principal) {
+		return this.dbConnectionService.executeQuery(connection, principal.getId(), statement);
 	}
 }
