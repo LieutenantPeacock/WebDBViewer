@@ -103,7 +103,7 @@ html, body {
 		</div>
 		<div class="row flex-grow-1" style="min-height: 0;">
 			<div class="col border mh-100" id="settingsCol">
-				<div id="connectionsContainer">
+				<div id="connectionsContainer" class="pb-3">
 					<h2 class="text-primary">Connections</h2>
 					<c:if test="${empty connections}">
 						<span style="font-weight: bold;" id="noConnections">Currently no connections!</span>
@@ -116,11 +116,14 @@ html, body {
 					<c:forEach items="${connections}" var="connection">
 						<div class="card mt-3 ${connection.id == param.connection ? 'active' : ''}">
 						  <div class="card-body">
-						    <h5 class="card-title">${connection.url} with username [${connection.username}]</h5>
-						    <p class="card-text">
-						    	<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
+						    <h5 class="card-title">${connection.name}</h5>
+					    	<details class="card-text">
+					    		<summary>Details</summary>
+					    		<strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
+					    		<strong class="text-decoration-underline">Username</strong>: ${connection.username} <br/>
+					    		<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
 						    	<strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}
-						    </p>
+					    	</details>
 						    <a href="<c:url value="/?connection=${connection.id}"/>" class="btn btn-primary">Open Connection</a>
 						  </div>
 						</div>
@@ -129,11 +132,14 @@ html, body {
 				<template id="connectionTemplate">
 					<div class="card mt-3">
 					  <div class="card-body">
-					    <h5 class="card-title">${connection.url} with username [${connection.username}]</h5>
-					    <p class="card-text">
-					    	<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
+					    <h5 class="card-title">${connection.name}</h5>
+				    	<details class="card-text">
+				    		<summary>Details</summary>
+				    		<strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
+				    		<strong class="text-decoration-underline">Username</strong>: ${connection.username} <br/>
+				    		<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
 					    	<strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}
-					    </p>
+				    	</details>
 					    <a href="<c:url value="/?connection=${connection.id}"/>" class="btn btn-primary">Open Connection</a>
 					  </div>
 					</div>
@@ -203,6 +209,11 @@ html, body {
 				<div class="modal-body">
 					<form class="needs-validation" novalidate id="newConnectionForm">
 					  <div class="mb-3">
+					  	<label for="connection_name" class="form-label">Connection Name</label>
+					  	<input type="text" class="form-control" id="connection_name" name="name" required/>
+					  	<div class="invalid-feedback">Please enter a name for the new connection.</div>
+					  </div>
+					  <div class="mb-3">
 					    <label for="connection_url" class="form-label">JDBC URL</label>
 					    <input type="text" class="form-control" id="connection_url" name="url" required/>
 					    <div class="invalid-feedback">Please enter the JDBC URL.</div>
@@ -225,14 +236,13 @@ html, body {
 					  			<option value="${driver}">${driver}</option>
 					  		</c:forEach>
 					  	</select>
-					  	<div class="invalid-feedback"></div>
 					  	<div class="invalid-feedback" id="driverPathError">Please select the JDBC Driver Location.</div>
 					  	<div id="driverUploadContainer">
 					  	<label for="driverUpload" class="form-label">Or Upload New Driver (one or more JAR files)</label>
-					  	<input class="form-control no-auto-validate" type="file" id="driverUpload" multiple accept=".jar"/>
+					  	<input class="form-control" type="file" id="driverUpload" multiple accept=".jar"/>
 					  	<div class="invalid-feedback" id="driverUploadError"></div>
 					  	<label for="driverFolderName" class="form-label">Driver Folder Name (required if more than one JAR file)</label>
-					  	<input class="form-control no-auto-validate" type="text" id="driverFolderName"/>
+					  	<input class="form-control" type="text" id="driverFolderName"/>
 					  	<div class="invalid-feedback" id="driverFolderError"></div>
 					  	<button type="button" class="btn btn-info mt-2 w-100" id="driverUploadBtn">Upload</button>
 					  	</div>

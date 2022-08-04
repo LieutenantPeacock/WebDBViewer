@@ -35,6 +35,8 @@ public class DBConnectionDef {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	@Column(length = 200)
+	private String name;
 	@Column(length = 1000)
 	private String url;
 	@Column(length = 1000)
@@ -54,6 +56,14 @@ public class DBConnectionDef {
 
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getUrl() {

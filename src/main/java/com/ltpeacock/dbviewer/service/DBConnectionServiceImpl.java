@@ -75,6 +75,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			final BindingResult result, final long userId) {
 		if (!result.hasErrors()) {
 			final DBConnectionDef connectionDef = new DBConnectionDef();
+			connectionDef.setName(form.getName());
 			connectionDef.setUrl(form.getUrl());
 			connectionDef.setDriverPath(form.getDriverPath());
 			connectionDef.setDriverName(form.getDriverName());

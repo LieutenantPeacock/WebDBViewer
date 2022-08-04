@@ -19,29 +19,30 @@
 		e.preventDefault();
 		if (!processing) {
 			processing = true;
-			this.classList.add('was-validated');
 			connectionFormError.textContent = '';
-			if (this.checkValidity()) {
-				_fetch(basePath + 'newConnection', {method: 'POST', body: new FormData(this)})
-					.then(data => {
-						if(data.success) {
-							bootstrap.Modal.getInstance(newConnectionModal).hide();
-							const connectionEl = connectionTemplate.content.cloneNode(true);
-							connectionEl.querySelector('.card-title')
-								.textContent = `${data.value.url} with username [${data.value.username}]`;
-							connectionEl.querySelector('.card-text').innerHTML
-								= `Driver Path: ${data.value.driverPath}<br/>Driver Class Name: ${data.value.driverName}`;
-							connectionEl.querySelector('a').href = basePath + `?connection=${data.value.id}`;
-							if(noConnections) noConnections.style.display = 'none';
-							connectionsContainer.appendChild(connectionEl);
-						} else {
-							showErrors(data.errors, 'connection_');
-						}
-					}).catch(error => {
-						console.error(error);
-						connectionFormError.textContent = 'An error occurred.';
-					}).finally(()=> processing = false);
-			}
+			_fetch(basePath + 'newConnection', {method: 'POST', body: new FormData(this)})
+				.then(data => {
+					if(data.success) {
+						bootstrap.Modal.getInstance(newConnectionModal).hide();
+						const connectionEl = connectionTemplate.content.cloneNode(true);
+						const connection = data.value;
+						connectionEl.querySelector('.card-title').textContent = connection.name;
+						connectionEl.querySelector('details').innerHTML =
+`<summary>Details</summary>
+<strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
+<strong class="text-decoration-underline">Username</strong>: ${connection.username} <br/>
+<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
+<strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}`;
+						connectionEl.querySelector('a').href = basePath + `?connection=${data.value.id}`;
+						if(noConnections) noConnections.style.display = 'none';
+						connectionsContainer.appendChild(connectionEl);
+					} else {
+						showErrors(data.errors, 'connection_');
+					}
+				}).catch(error => {
+					console.error(error);
+					connectionFormError.textContent = 'An error occurred.';
+				}).finally(()=> processing = false);
 		}
 	});
 	const tableSelect = document.getElementById('tableSelect');
@@ -128,7 +129,7 @@
 	driverPathSelect.addEventListener('change', onDriverPathChange);
 	const statementMessage = document.getElementById('statementMessage');
 	const tableContents = document.getElementById('tableContents');
-	document.getElementById('statementForm').addEventListener('submit', function(e){
+	document.getElementById('statementForm')?.addEventListener('submit', function(e){
 		e.preventDefault();
 		statementMessage.textContent = '';
 		statementMessage.classList.remove('text-danger');
