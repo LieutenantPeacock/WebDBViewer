@@ -17,6 +17,9 @@
  */
 package com.ltpeacock.dbviewer.service;
 
+import static com.ltpeacock.dbviewer.commons.LogMarkers.AUDIT;
+import static com.ltpeacock.dbviewer.commons.MDCKeys.CONNECTION_ID;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -27,8 +30,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +46,7 @@ import com.ltpeacock.dbviewer.commons.exceptions.DBViewerResourceNotFoundExcepti
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerRuntimeException;
 import com.ltpeacock.dbviewer.commons.exceptions.ErrorCode;
 import com.ltpeacock.dbviewer.db.CustomDriverManager;
+import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.TableColumn;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
@@ -47,6 +54,7 @@ import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
 import com.ltpeacock.dbviewer.db.repository.DBConnectionDefRepository;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
+import com.ltpeacock.dbviewer.response.SimpleResponse;
 import com.ltpeacock.dbviewer.util.Util;
 
 /**
@@ -144,5 +152,35 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			rows.add(row);
 		}
 		return new TableData(columns, rows);
+	}
+	
+	@Transactional
+	@Override
+	public SimpleResponse<QueryResult> executeQuery(final long connectionId, final long userId,
+			final String query) {
+		MDC.put(CONNECTION_ID, String.valueOf(connectionId));
+		final DBConnectionDef def = getDef(connectionId, userId);
+		if (StringUtils.countMatches(query, ';') > 1) {
+			LOG.info(AUDIT, "Attempt to execute multiple statements on denied.");
+			return new SimpleResponse<>("Only one statement allowed at a time.");
+		}
+		final StopWatch sw = StopWatch.createStarted();
+		boolean success = false;
+		try (Connection con = driverManager.getConnection(def);
+				Statement statement = con.createStatement()) {
+			final boolean isResultSet = statement.execute(query);
+			final SimpleResponse<QueryResult> response = isResultSet ? 
+					new SimpleResponse<>(new QueryResult(resultSetToTableData(statement.getResultSet())))
+					: new SimpleResponse<>(new QueryResult(statement.getUpdateCount()));
+			success = true;
+			return response;
+		} catch (SQLException e) {
+			return new SimpleResponse<>(e.getMessage());
+		} finally {
+			sw.stop();
+			LOG.info(AUDIT,
+				"Query [{}] {} in {} ms", query, success ? "succeeded" : "failed", sw.getTime());
+			MDC.remove(CONNECTION_ID);
+		}
 	}
 }

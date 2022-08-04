@@ -22,9 +22,11 @@ import java.util.List;
 import org.springframework.validation.BindingResult;
 
 import com.colonelparrot.dbviewer.db.TableData;
+import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
+import com.ltpeacock.dbviewer.response.SimpleResponse;
 
 /**
  * @author LieutenantPeacock
@@ -34,4 +36,6 @@ public interface DBConnectionService {
 			final BindingResult result, final long userId);
 	List<String> getTables(final long connectionId, final long userId);
 	TableData getTableContents(final long connectionId, final long userId, final String tableName);
+	SimpleResponse<QueryResult> executeQuery(final long connectionId, final long userId, 
+			final String query);
 }

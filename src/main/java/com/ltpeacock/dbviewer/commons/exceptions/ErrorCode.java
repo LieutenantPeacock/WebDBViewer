@@ -26,7 +26,8 @@ public enum ErrorCode {
 	TABLES_RETRIEVAL_EXCEPTION("003", "Could not load tables in database."),
 	ACCESS_NOT_ALLOWED("004", "Access to certain resource/endpoint is not allowed for the current user."),
 	RESOURCE_NOT_FOUND("005", "Could not find resource."),
-	TABLE_CONTENT_RETRIEVAL_EXCEPTION("006", "Could not load contents of table.");
+	TABLE_CONTENT_RETRIEVAL_EXCEPTION("006", "Could not load contents of table."),
+	QUERY_EXECUTION_EXCEPTION("007", "Error executing query.");
 	
 	private final String code;
 	private final String message;
