@@ -28,6 +28,7 @@ import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.form.NewUserForm;
 import com.ltpeacock.dbviewer.form.SetupForm;
 import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
+import com.ltpeacock.dbviewer.response.SimpleResponse;
 
 /**
  * @author LieutenantPeacock
@@ -37,4 +38,7 @@ public interface UserService {
 	List<DBConnectionDef> getConnections(long id);
 	List<AppUser> getAllUsers();
 	MappedMultiErrorsResponse<AppUserDTO> createUser(NewUserForm form, BindingResult result);
+	List<AppUserDTO> findUsersNotInConnectionWithSimilarUsername(final long connectionId, 
+			final String username);
+	SimpleResponse<AppUserDTO> getUserInfo(final String username);
 }

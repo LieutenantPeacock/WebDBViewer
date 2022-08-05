@@ -19,6 +19,7 @@ package com.ltpeacock.dbviewer.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,9 +34,11 @@ import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.entity.AppUser;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
+import com.ltpeacock.dbviewer.db.repository.DBConnectionDefRepository;
 import com.ltpeacock.dbviewer.form.NewUserForm;
 import com.ltpeacock.dbviewer.form.SetupForm;
 import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
+import com.ltpeacock.dbviewer.response.SimpleResponse;
 import com.ltpeacock.dbviewer.util.Util;
 
 /**
@@ -49,6 +52,8 @@ public class UserServiceImpl implements UserService {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private SetupInfo setupInfo;
+	@Autowired
+	private DBConnectionDefRepository dbConnectionDefRepository;
 
 	@Override
 	public AppUserPrincipal createAdmin(final SetupForm form, final BindingResult result) {
@@ -94,5 +99,19 @@ public class UserServiceImpl implements UserService {
 			return new MappedMultiErrorsResponse<>(new AppUserDTO(userRepository.save(user)));
 		}
 		return new MappedMultiErrorsResponse<>(Util.toMultiErrorMap(result));
+	}
+	
+	@Override
+	public List<AppUserDTO> findUsersNotInConnectionWithSimilarUsername(long connectionId, final String username) {
+		final DBConnectionDef connectionDef = dbConnectionDefRepository.getReferenceById(connectionId);
+		return userRepository.findUsersNotInConnectionWithSimilarUsername(connectionDef, username)
+				.stream().map(AppUserDTO::new).collect(Collectors.toList());
+	}
+	
+	@Override
+	public SimpleResponse<AppUserDTO> getUserInfo(final String username) {
+		final AppUser user = userRepository.findByUsernameIgnoreCase(username);
+		return user != null ? new SimpleResponse<>(new AppUserDTO(user)) : 
+				new SimpleResponse<>("User does not exist.");
 	}
 }
