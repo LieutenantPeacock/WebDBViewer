@@ -17,6 +17,8 @@
  */
 package com.ltpeacock.dbviewer.db.dto;
 
+import java.util.List;
+
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 
 /**
@@ -30,6 +32,7 @@ public class DBConnectionDefDTO {
 	private final String driverName;
 	private final String username;
 	private final String password;
+	private List<AppUserDTO> users;
 
 	public DBConnectionDefDTO(final DBConnectionDef def) {
 		this.id = def.getId();
@@ -67,5 +70,13 @@ public class DBConnectionDefDTO {
 
 	public String getPassword() {
 		return password;
+	}
+
+	public List<AppUserDTO> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<AppUserDTO> users) {
+		this.users = users;
 	}
 }
