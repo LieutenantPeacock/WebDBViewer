@@ -17,6 +17,8 @@
  */
 package com.ltpeacock.dbviewer.form;
 
+import java.util.List;
+
 import javax.validation.constraints.NotBlank;
 
 /**
@@ -33,6 +35,8 @@ public class ConnectionForm {
 	private String driverPath;
 	@NotBlank(message = "Driver name must not be blank.")
 	private String driverName;
+	private Long id;
+	private List<Long> userIds;
 
 	public String getName() {
 		return name;
@@ -80,5 +84,21 @@ public class ConnectionForm {
 
 	public void setDriverName(String driverName) {
 		this.driverName = driverName;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public List<Long> getUserIds() {
+		return userIds;
+	}
+
+	public void setUserIds(List<Long> userIds) {
+		this.userIds = userIds;
 	}
 }
