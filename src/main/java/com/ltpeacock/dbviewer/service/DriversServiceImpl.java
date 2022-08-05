@@ -127,7 +127,8 @@ public class DriversServiceImpl implements DriversService {
 					break;
 				}
 		}
-		return new MappedErrorsResponse<>(driverPath, errors);
+		return errors.isEmpty() ? new MappedErrorsResponse<>(driverPath)
+				: new MappedErrorsResponse<>(errors);
 	}
 
 	@Override

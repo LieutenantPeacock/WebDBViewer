@@ -17,7 +17,6 @@
  */
 package com.ltpeacock.dbviewer.response;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -25,7 +24,7 @@ import java.util.Map;
  */
 public class MappedErrorsResponse<T> {
 	private T value;
-	private Map<String, String> errors = Collections.emptyMap();
+	private Map<String, String> errors;
 
 	public MappedErrorsResponse(final T value) {
 		this.value = value;
@@ -34,29 +33,12 @@ public class MappedErrorsResponse<T> {
 	public MappedErrorsResponse(final Map<String, String> errors) {
 		this.errors = errors;
 	}
-	
-	public MappedErrorsResponse(final T value, final Map<String, String> errors) {
-		this.value = value;
-		this.errors = errors;
-	}
 
 	public T getValue() {
 		return value;
 	}
 
-	public void setValue(T value) {
-		this.value = value;
-	}
-
 	public Map<String, String> getErrors() {
 		return errors;
-	}
-
-	public void setErrors(Map<String, String> errors) {
-		this.errors = errors;
-	}
-	
-	public boolean getSuccess() {
-		return this.errors.isEmpty();
 	}
 }
