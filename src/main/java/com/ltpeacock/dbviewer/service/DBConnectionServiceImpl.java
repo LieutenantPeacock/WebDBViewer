@@ -29,12 +29,14 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,12 +50,14 @@ import com.ltpeacock.dbviewer.commons.exceptions.ErrorCode;
 import com.ltpeacock.dbviewer.db.CustomDriverManager;
 import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.TableColumn;
+import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
 import com.ltpeacock.dbviewer.db.repository.DBConnectionDefRepository;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
+import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
 import com.ltpeacock.dbviewer.response.SimpleResponse;
 import com.ltpeacock.dbviewer.util.Util;
 
@@ -183,5 +187,28 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 				"Query [{}] {} in {} ms", query, success ? "succeeded" : "failed", sw.getTime());
 			MDC.remove(CONNECTION_ID);
 		}
+	}
+	
+	@Transactional(readOnly = true)
+	@Override
+	public DBConnectionDefDTO getConnectionDetails(final long id) {
+		final DBConnectionDef connectionDef = dbConnectionDefRepository.findById(id);
+		final DBConnectionDefDTO connectionDefDTO = new DBConnectionDefDTO(connectionDef);
+		connectionDefDTO.setUsers(connectionDef.getUsers().stream().map(AppUserDTO::new)
+					.collect(Collectors.toList()));
+		return connectionDefDTO;
+	}
+	
+	@Transactional
+	@Override
+	public MappedMultiErrorsResponse<DBConnectionDefDTO> updateConnection(final ConnectionForm form,
+			final BindingResult result) {
+		if (result.hasErrors()) {
+			return new MappedMultiErrorsResponse<>(Util.toMultiErrorMap(result));
+		}
+		final DBConnectionDef connectionDef = dbConnectionDefRepository.getReferenceById(form.getId());
+		BeanUtils.copyProperties(form, connectionDef, "id", "userIds");
+		connectionDef.setUsers(userRepository.findAllById(form.getUserIds()));
+		return new MappedMultiErrorsResponse<>(new DBConnectionDefDTO(dbConnectionDefRepository.save(connectionDef)));
 	}
 }

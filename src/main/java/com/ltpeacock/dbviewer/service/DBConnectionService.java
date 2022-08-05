@@ -26,6 +26,7 @@ import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
+import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
 import com.ltpeacock.dbviewer.response.SimpleResponse;
 
 /**
@@ -38,4 +39,7 @@ public interface DBConnectionService {
 	TableData getTableContents(final long connectionId, final long userId, final String tableName);
 	SimpleResponse<QueryResult> executeQuery(final long connectionId, final long userId, 
 			final String query);
+	DBConnectionDefDTO getConnectionDetails(final long id);
+	MappedMultiErrorsResponse<DBConnectionDefDTO> updateConnection(final ConnectionForm form, 
+			final BindingResult result);
 }
