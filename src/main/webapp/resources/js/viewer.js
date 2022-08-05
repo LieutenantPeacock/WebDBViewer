@@ -15,7 +15,7 @@
 	const noConnections = document.getElementById('noConnections');
 	const connectionsContainer = document.getElementById('connectionsContainer');
 	let processing = false;
-	document.getElementById('newConnectionForm').addEventListener('submit', function(e){
+	document.getElementById('newConnectionForm')?.addEventListener('submit', function(e){
 		e.preventDefault();
 		if (!processing) {
 			processing = true;
@@ -64,7 +64,7 @@
 	const driverNameContainer = document.getElementById('driverNameContainer');
 	const driverPathError = document.getElementById('driverPathError');
 	const driverNameSelect = document.getElementById('connection_driverName');
-	driverPathSelect.selectedIndex = -1;
+	if(driverPathSelect) driverPathSelect.selectedIndex = -1;
 	function removeInvalid(elem) {
 		elem.classList.remove('is-invalid');
 	}
@@ -105,7 +105,7 @@
 			input.classList.add('is-invalid');
 		}
 	}
-	document.getElementById('driverUploadBtn').addEventListener('click', function(e){
+	document.getElementById('driverUploadBtn')?.addEventListener('click', function(e){
 		removeAllErrors(driverUploadContainer);
 		if (driverUpload.files.length) {
 			this.disabled = true;
@@ -152,7 +152,7 @@
 			driverPathSelect.classList.add('is-invalid');
 		});
 	}
-	driverPathSelect.addEventListener('change', onDriverPathChange);
+	driverPathSelect?.addEventListener('change', onDriverPathChange);
 	const statementMessage = document.getElementById('statementMessage');
 	const tableContents = document.getElementById('tableContents');
 	document.getElementById('statementForm')?.addEventListener('submit', function(e){
