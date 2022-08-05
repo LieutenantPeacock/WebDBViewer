@@ -17,9 +17,14 @@
  */
 package com.ltpeacock.dbviewer.db.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.ltpeacock.dbviewer.db.entity.AppUser;
+import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 
 /**
  * @author LieutenantPeacock
@@ -27,4 +32,7 @@ import com.ltpeacock.dbviewer.db.entity.AppUser;
 public interface AppUserRepository extends JpaRepository<AppUser, Long>{
 	AppUser findByUsernameIgnoreCase(String username);
 	AppUser findById(long id);
+	@Query("select distinct u from AppUser u where u.username like CONCAT('%',:username,'%') and :connection not member of u.connections")
+	List<AppUser> findUsersNotInConnectionWithSimilarUsername(@Param("connection") final DBConnectionDef connection, 
+				@Param("username") final String username);
 }
