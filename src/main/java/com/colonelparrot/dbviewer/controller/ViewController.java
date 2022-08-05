@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -21,11 +22,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
+import com.ltpeacock.dbviewer.commons.RoleNames;
 import com.ltpeacock.dbviewer.db.DriverVO;
 import com.ltpeacock.dbviewer.db.QueryResult;
+import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
+import com.ltpeacock.dbviewer.form.NewUserForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
+import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
 import com.ltpeacock.dbviewer.response.SimpleResponse;
 import com.ltpeacock.dbviewer.service.DBConnectionService;
 import com.ltpeacock.dbviewer.service.DriversService;
@@ -37,7 +42,6 @@ import com.ltpeacock.dbviewer.service.UserService;
  */
 @Controller
 public class ViewController {
-	private static final String INVALID_FIELD_VALUE = "Invalid field value";
 	private static final Logger LOG = LoggerFactory.getLogger(ViewController.class);
 	@Autowired
 	private UserService userService;
@@ -49,7 +53,8 @@ public class ViewController {
 	@GetMapping("/")
 	public String getStuff(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
 			final @RequestParam(required = false) String connection,
-			final @RequestParam(required = false) String table) {
+			final @RequestParam(required = false) String table,
+			final HttpServletRequest request) {
 		try {
 			if(connection != null) {
 				final long connectionId = Long.parseLong(connection);
@@ -64,6 +69,9 @@ public class ViewController {
 		}
 		model.addAttribute("connections", userService.getConnections(principal.getId()));
 		model.addAttribute("drivers", driversService.getDriverPaths());
+		if (request.isUserInRole(RoleNames.ADMIN)) {
+			model.addAttribute("users", userService.getAllUsers());
+		}
 		return "viewer";
 	}
 	
@@ -94,5 +102,11 @@ public class ViewController {
 			final @RequestParam long connection,
 			@AuthenticationPrincipal final AppUserPrincipal principal) {
 		return this.dbConnectionService.executeQuery(connection, principal.getId(), statement);
+	}
+	
+	@PostMapping("/newUser")
+	@ResponseBody
+	public MappedMultiErrorsResponse<AppUserDTO> createUser(final @Valid NewUserForm form, final BindingResult result) {
+		return this.userService.createUser(form, result);
 	}
 }

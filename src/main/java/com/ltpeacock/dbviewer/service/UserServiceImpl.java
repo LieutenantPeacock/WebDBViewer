@@ -27,11 +27,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
+import com.ltpeacock.dbviewer.commons.RoleNames;
 import com.ltpeacock.dbviewer.commons.SetupInfo;
+import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.entity.AppUser;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
+import com.ltpeacock.dbviewer.form.NewUserForm;
 import com.ltpeacock.dbviewer.form.SetupForm;
+import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
+import com.ltpeacock.dbviewer.util.Util;
 
 /**
  * @author LieutenantPeacock
@@ -51,13 +56,13 @@ public class UserServiceImpl implements UserService {
 			result.rejectValue("password", "", "Password and confirm password must match.");
 		if (!Objects.equals(form.getTempPassword(), setupInfo.getAdminPassword()))
 			result.rejectValue("tempPassword", "", "Incorrect temporary password.");
-		if(Objects.equals(form.getPassword(), setupInfo.getAdminPassword())) 
+		if (Objects.equals(form.getPassword(), setupInfo.getAdminPassword()))
 			result.rejectValue("password", "", "New password must be different from the temporary password.");
 		if (!result.hasErrors()) {
 			final AppUser user = new AppUser();
 			user.setUsername(form.getUsername());
 			user.setPassword(passwordEncoder.encode(form.getPassword()));
-			user.addAuthority("ROLE_ADMIN");
+			user.addAuthority(RoleNames.ADMIN);
 			return new AppUserPrincipal(userRepository.save(user));
 		}
 		return null;
@@ -69,5 +74,25 @@ public class UserServiceImpl implements UserService {
 		final AppUser user = userRepository.findById(id);
 		user.getConnections().size(); // trigger initialization
 		return user.getConnections();
+	}
+
+	@Override
+	public List<AppUser> getAllUsers() {
+		return userRepository.findAll();
+	}
+
+	@Override
+	public MappedMultiErrorsResponse<AppUserDTO> createUser(final NewUserForm form, final BindingResult result) {
+		if (!Objects.equals(form.getPassword(), form.getConfirmPassword()))
+			result.rejectValue("confirmPassword", "", "Password and confirm password must match.");
+		if (userRepository.findByUsernameIgnoreCase(form.getUsername()) != null) 
+			result.rejectValue("username", "", "Username already exists.");
+		if (!result.hasErrors()) {
+			final AppUser user = new AppUser();
+			user.setUsername(form.getUsername());
+			user.setPassword(passwordEncoder.encode(form.getPassword()));
+			return new MappedMultiErrorsResponse<>(new AppUserDTO(userRepository.save(user)));
+		}
+		return new MappedMultiErrorsResponse<>(Util.toMultiErrorMap(result));
 	}
 }

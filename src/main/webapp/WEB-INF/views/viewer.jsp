@@ -144,6 +144,20 @@ html, body {
 					  </div>
 					</div>
 				</template>
+				<sec:authorize access="hasRole('ADMIN')">
+					<div id="usersContainer" class="pb-3">
+						<h2>Users</h2>
+						<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#newUserModal">Create User</button>
+						<ul class="list-group mt-2">
+							<c:forEach var="user" items="${users}">
+								<li class="list-group-item d-flex justify-content-between align-items-center">
+									${user.username}
+									<span class="badge rounded-pill">14</span>
+								</li>
+							</c:forEach>
+						</ul>
+					</div>
+				</sec:authorize>
 			</div>
 			<div class="col border mh-100" style="overflow: auto;">
 				<c:if test="${tables != null}">
@@ -198,11 +212,11 @@ html, body {
 	</div>
 	<sec:authorize access="hasRole('ADMIN')">
 	<div class="modal fade" id="newConnectionModal" tabindex="-1"
-		aria-labelledby="exampleModalLabel" aria-hidden="true">
+		aria-labelledby="newConnectionModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalLabel">New Connection</h5>
+					<h5 class="modal-title" id="newConnectionModalLabel">New Connection</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"
 						aria-label="Close"></button>
 				</div>
@@ -261,6 +275,39 @@ html, body {
 					<button type="button" class="btn btn-secondary"
 						data-bs-dismiss="modal">Close</button>
 					<button type="submit" class="btn btn-outline-success" form="newConnectionForm">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="newUserModal" tabindex="-1"
+		aria-labelledby="newUserModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="newUserModalLabel">New User</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"
+						aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form novalidate id="newUserForm" class="needs-validation">
+						<div class="mb-3">
+							<label for="newUser_username" class="form-label">Username</label>
+							<input type="text" class="form-control" id="newUser_username" name="username" required/>
+							<div class="invalid-feedback">Please enter a username.</div>
+						</div>
+						<div class="mb-3">
+							<label for="newUser_password" class="form-label">Password</label>
+							<input type="password" class="form-control" id="newUser_password" name="password" required/>
+							<div class="invalid-feedback">Please enter a password.</div>
+						</div>
+						<div>
+							<label for="newUser_confirmPassword" class="form-label">Confirm Password</label>
+							<input type="password" class="form-control" id="newUser_confirmPassword" name="confirmPassword" required/>
+							<div class="invalid-feedback">Please confirm your password.</div>
+						</div>
+						<div class="my-3 text-danger" id="userFormError"></div>
+						<button type="submit" class="btn btn-outline-success">Submit</button>
+					</form>
 				</div>
 			</div>
 		</div>

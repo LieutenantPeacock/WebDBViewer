@@ -22,7 +22,7 @@
 			connectionFormError.textContent = '';
 			_fetch(basePath + 'newConnection', {method: 'POST', body: new FormData(this)})
 				.then(data => {
-					if(data.success) {
+					if(!data.errors) {
 						bootstrap.Modal.getInstance(newConnectionModal).hide();
 						const connectionEl = connectionTemplate.content.cloneNode(true);
 						const connection = data.value;
@@ -65,23 +65,48 @@
 	const driverPathError = document.getElementById('driverPathError');
 	const driverNameSelect = document.getElementById('connection_driverName');
 	driverPathSelect.selectedIndex = -1;
-	driverUpload.addEventListener('change', function(e){
-		this.classList.remove('is-invalid');
-	});
-	driverFolderName.addEventListener('input', function(e){
-		this.classList.remove('is-invalid');
-	})
+	function removeInvalid(elem) {
+		elem.classList.remove('is-invalid');
+	}
+	function removeAllErrors(container) {
+		container.querySelectorAll('.is-invalid').forEach(removeInvalid);
+	}
+	document.querySelectorAll('form.needs-validation select')
+		.forEach(select => {
+			select.addEventListener('change', function(e){
+				removeInvalid(this);
+			});
+		});
+	document.querySelectorAll('form.needs-validation input, form.needs-validation textarea')
+		.forEach(input => {
+			input.addEventListener('input', function(e){
+				removeInvalid(this);
+			});
+		});
 	function showErrors(errors, idPrefix = '') {
 		for (const [inputName, error] of Object.entries(errors)) {
 			const input = document.getElementById(idPrefix + inputName);
-			if (input.nextElementSibling && input.nextElementSibling.matches('.invalid-feedback')) 
-				input.nextElementSibling.textContent = error;
+			if (input.nextElementSibling && input.nextElementSibling.matches('.invalid-feedback')) {
+				const errorContainer = input.nextElementSibling;
+				if (Array.isArray(error)) {
+					if (error.length === 1) 
+						errorContainer.textContent = error[0];
+					else {
+						errorContainer.textContent = '';
+						const ul = document.createElement('ul');
+						for (const e of error)
+							ul.appendChild(Object.assign(document.createElement('li'), {textContent: e}));
+						errorContainer.appendChild(ul);
+					}
+				} else {
+					errorContainer.textContent = error;
+				}
+			}
 			input.classList.add('is-invalid');
 		}
 	}
 	document.getElementById('driverUploadBtn').addEventListener('click', function(e){
-		driverUploadContainer.querySelectorAll('.is-invalid')
-				.forEach(el => el.classList.remove('is-invalid'));
+		removeAllErrors(driverUploadContainer);
 		if (driverUpload.files.length) {
 			this.disabled = true;
 			const data = new FormData;
@@ -92,13 +117,14 @@
 				method: 'POST',
 				body: data
 			}).then(data => {
-				showErrors(data.errors);
-				if (data.success) {
+				if (!data.errors) {
 					driverPathSelect.add(new Option(data.value));
 					driverPathSelect.value = data.value;
 					onDriverPathChange();
 					driverUploadContainer.querySelectorAll('input')
 						.forEach(input => input.value = "");
+				} else {
+					showErrors(data.errors);
 				}
 			}).catch(error => {
 				driverUploadError.textContent = 'An error occurred.';
@@ -163,5 +189,27 @@
 			statementMessage.classList.add('text-danger');
 			statementMessage.textContent = 'An error occurred.';
 		});
+	});
+	const userFormError = document.getElementById('userFormError');
+	const usersList = document.querySelector('#usersContainer > ul');
+	const newUserModal = document.getElementById('newUserModal');
+	document.getElementById('newUserForm')?.addEventListener('submit', function(e){
+		e.preventDefault();
+		removeAllErrors(this);
+		userFormError.textContent = '';
+		_fetch(basePath + 'newUser', {body: new FormData(this), method: 'POST'})
+			.then(data => {
+				if (data.errors) {
+					showErrors(data.errors, 'newUser_');
+				} else {
+					const li = document.createElement('li');
+					li.className = 'list-group-item d-flex justify-content-between align-items-center';
+					li.textContent = data.value.username;
+					usersList.appendChild(li);
+					bootstrap.Modal.getInstance(newUserModal).hide();
+				}
+			}).catch(error => {
+				userFormError.textContent = 'An error occurred.';
+			});
 	});
 })();
