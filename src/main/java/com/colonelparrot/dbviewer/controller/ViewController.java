@@ -109,4 +109,32 @@ public class ViewController {
 	public MappedMultiErrorsResponse<AppUserDTO> createUser(final @Valid NewUserForm form, final BindingResult result) {
 		return this.userService.createUser(form, result);
 	}
+	
+	@GetMapping("/connectionDetails")
+	@Secured("ROLE_ADMIN")
+	@ResponseBody
+	public DBConnectionDefDTO getConnectionDetails(@RequestParam final long id) {
+		return this.dbConnectionService.getConnectionDetails(id);
+	}
+	
+	@GetMapping("/autocompleteUsersNotInConnection")
+	@Secured("ROLE_ADMIN")
+	@ResponseBody
+	public List<AppUserDTO> autocompleteUsers(@RequestParam final String text, @RequestParam final long connectionId){
+		return this.userService.findUsersNotInConnectionWithSimilarUsername(connectionId, text);
+	}
+	
+	@GetMapping("/userinfo")
+	@Secured("ROLE_ADMIN")
+	@ResponseBody
+	public SimpleResponse<AppUserDTO> userInfo(@RequestParam final String username) {
+		return this.userService.getUserInfo(username);
+	}
+	
+	@PostMapping("/updateConnection")
+	@Secured(RoleNames.ADMIN)
+	@ResponseBody
+	public MappedMultiErrorsResponse<DBConnectionDefDTO> updateConnection(final @Valid ConnectionForm form, final BindingResult result) {
+		return this.dbConnectionService.updateConnection(form, result);
+	}
 }

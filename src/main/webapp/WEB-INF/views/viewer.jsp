@@ -16,6 +16,7 @@
 	href="<c:url value="/resources/css/icons/icons.css"/>" />
 <link rel="stylesheet"
 	href="<c:url value="/resources/css/bootstrap-5.2.0.min.css"/>" />
+<link rel="stylesheet" href="<c:url value="/resources/css/jquery-ui-1.13.2.min.css"/>"/>
 <style>
 @import
 	url('https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap');
@@ -82,6 +83,18 @@ html, body {
 #tableContents td {
 	word-break: break-all; /* overflow-wrap: break-word; */
 }
+
+.connection-edit {
+	font-size: inherit;
+	color: green;
+	cursor: pointer;
+}
+
+.remove-connection-user {
+	vertical-align: middle;
+	color: red;
+	cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -91,6 +104,8 @@ html, body {
 			<h1><a href="<c:url value="/"/>">DB Viewer</a></h1>
 			<p>Lieutenant Peacock</p>
 			<sec:authorize access="isAuthenticated()">
+				<sec:authentication property="principal.id" var="userId"/>
+				<input type="hidden" id="userId" value="${userId}"/>
 				<form method="POST" action="<c:url value="/logout"/>" title="Log Out">
 					<div id="logoutControl">
 						<button style="background: transparent; border: none; padding: 0;">
@@ -109,14 +124,18 @@ html, body {
 						<span style="font-weight: bold;" id="noConnections">Currently no connections!</span>
 					</c:if>
 					<sec:authorize access="hasRole('ADMIN')">
-						<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newConnectionModal">
+						<button type="button" class="btn btn-primary" id="newConnectionBtn" data-bs-toggle="modal" data-bs-target="#connectionModal">
 							Add New Connection
 						</button>
 					</sec:authorize>
 					<c:forEach items="${connections}" var="connection">
-						<div class="card mt-3 ${connection.id == param.connection ? 'active' : ''}">
+						<div class="card mt-3 connection-container ${connection.id == param.connection ? 'active' : ''}" data-id="${connection.id}">
 						  <div class="card-body">
-						    <h5 class="card-title">${connection.name}</h5>
+						    <h5 class="card-title"><span class="connection-name">${connection.name}</span>
+						    	<sec:authorize access="hasRole('ADMIN')">
+						    		<span class="material-icons connection-edit" title="Edit">edit</span>
+						    	</sec:authorize>
+						    </h5>
 					    	<details class="card-text">
 					    		<summary>Details</summary>
 					    		<strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
@@ -130,9 +149,13 @@ html, body {
 					</c:forEach>
 				</div>
 				<template id="connectionTemplate">
-					<div class="card mt-3">
+					<div class="card mt-3 connection-container">
 					  <div class="card-body">
-					    <h5 class="card-title">${connection.name}</h5>
+					    <h5 class="card-title"><span class="connection-name">${connection.name}</span>
+					    	<sec:authorize access="hasRole('ADMIN')">
+					    		<span class="material-icons connection-edit" title="Edit">edit</span>
+					    	</sec:authorize>
+					    </h5>
 				    	<details class="card-text">
 				    		<summary>Details</summary>
 				    		<strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
@@ -150,9 +173,11 @@ html, body {
 						<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#newUserModal">Create User</button>
 						<ul class="list-group mt-2">
 							<c:forEach var="user" items="${users}">
-								<li class="list-group-item d-flex justify-content-between align-items-center">
+								<li class="list-group-item justify-content-between align-items-center">
 									${user.username}
-									<span class="badge rounded-pill">14</span>
+									<c:if test="${user.id == userId}">
+										<span class="text-info fw-bold fst-italic">(You)</span>
+									</c:if>
 								</li>
 							</c:forEach>
 						</ul>
@@ -211,17 +236,18 @@ html, body {
 		</div>
 	</div>
 	<sec:authorize access="hasRole('ADMIN')">
-	<div class="modal fade" id="newConnectionModal" tabindex="-1"
-		aria-labelledby="newConnectionModalLabel" aria-hidden="true">
+	<div class="modal fade" id="connectionModal" tabindex="-1"
+		aria-labelledby="connectionModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-scrollable">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title" id="newConnectionModalLabel">New Connection</h5>
+					<h5 class="modal-title" id="connectionModalLabel">New Connection</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"
 						aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
-					<form class="needs-validation" novalidate id="newConnectionForm">
+					<form class="needs-validation" novalidate id="connectionForm">
+						<input type="hidden" name="id"/>
 					  <div class="mb-3">
 					  	<label for="connection_name" class="form-label">Connection Name</label>
 					  	<input type="text" class="form-control" id="connection_name" name="name" required/>
@@ -270,11 +296,27 @@ html, body {
 					  </div>
 					  <div class="mt-3 text-danger" id="connectionFormError"></div>
 					 </form>
+					<div id="connectionUsers" class="pb-3" style="display: none;">
+						<h3>Users</h3>
+						<div id="noConnectionUsers" style="display: none;">No users!</div>
+						<ul class="list-group mt-2">
+						</ul>
+						<form id="connectionAddUserForm">
+							<div class="input-group mt-3">
+								<div class="form-floating">
+									<input type="text" class="form-control" id="connectionAddUser" placeholder="Username"/>
+									<label for="connectionAddUser">Add User To Connection</label>
+								</div>
+								<button class="btn btn-outline-primary">Add</button>
+							</div>
+						</form>
+						<div id="connectionAddUserError" class="text-danger"></div>
+					</div>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary"
 						data-bs-dismiss="modal">Close</button>
-					<button type="submit" class="btn btn-outline-success" form="newConnectionForm">Save</button>
+					<button type="submit" class="btn btn-outline-success" form="connectionForm">Save</button>
 				</div>
 			</div>
 		</div>
@@ -314,6 +356,8 @@ html, body {
 	</div>
 	</sec:authorize>
 	<script src="<c:url value="/resources/js/bootstrap-5.2.0.bundle.min.js"/>"></script>
+	<script src="<c:url value="/resources/js/jquery-3.6.0.min.js"/>"></script>
+	<script src="<c:url value="/resources/js/jquery-ui-1.13.2.min.js"/>"></script>
 	<script src="<c:url value="/resources/js/viewer.js"/>"></script>
 </body>
 </html>

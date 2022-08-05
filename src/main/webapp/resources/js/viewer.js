@@ -2,6 +2,7 @@
 	const csrfToken = document.querySelector("meta[name='_csrf']").content;
 	const csrfHeader = document.querySelector("meta[name='_csrf_header']").content;
 	const basePath = document.getElementById('basePath').value;
+	const userId = $('#userId').val();
 	document.querySelector('#connectionsContainer > .card.active')?.scrollIntoView(false);
 	function _fetch(resource, options) {
 		return fetch(resource, {...options, headers: {...options?.headers, [csrfHeader]: csrfToken}})
@@ -11,39 +12,143 @@
 				});
 	}
 	const connectionFormError = document.getElementById('connectionFormError');
-	const newConnectionModal = document.getElementById('newConnectionModal');
+	const connectionModal = document.getElementById('connectionModal');
 	const noConnections = document.getElementById('noConnections');
 	const connectionsContainer = document.getElementById('connectionsContainer');
-	let processing = false;
-	document.getElementById('newConnectionForm')?.addEventListener('submit', function(e){
-		e.preventDefault();
-		if (!processing) {
-			processing = true;
-			connectionFormError.textContent = '';
-			_fetch(basePath + 'newConnection', {method: 'POST', body: new FormData(this)})
-				.then(data => {
-					if(!data.errors) {
-						bootstrap.Modal.getInstance(newConnectionModal).hide();
-						const connectionEl = connectionTemplate.content.cloneNode(true);
-						const connection = data.value;
-						connectionEl.querySelector('.card-title').textContent = connection.name;
-						connectionEl.querySelector('details').innerHTML =
+	const $connectionForm = $('#connectionForm');
+	$('#newConnectionBtn').click(function(e){
+		$connectionForm[0].reset();
+		$('#connectionModalLabel').text('New Connection');
+		$('#connection_driverPath').prop('selectedIndex', -1);
+		$connectionForm.find('input[name=id]').val('');
+		$('#driverNameContainer').hide();
+		$('#connectionUsers').hide();
+	});
+	function setConnectionData(connectionEl, connection) {
+		const container = connectionEl.querySelector('.connection-container');
+		if(container) container.dataset.id = connection.id;
+		connectionEl.querySelector('.connection-name').textContent = connection.name;
+		connectionEl.querySelector('details').innerHTML =
 `<summary>Details</summary>
 <strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
 <strong class="text-decoration-underline">Username</strong>: ${connection.username} <br/>
 <strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
 <strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}`;
-						connectionEl.querySelector('a').href = basePath + `?connection=${data.value.id}`;
-						if(noConnections) noConnections.style.display = 'none';
-						connectionsContainer.appendChild(connectionEl);
-					} else {
-						showErrors(data.errors, 'connection_');
-					}
-				}).catch(error => {
-					console.error(error);
-					connectionFormError.textContent = 'An error occurred.';
-				}).finally(()=> processing = false);
+		connectionEl.querySelector('a').href = basePath + `?connection=${connection.id}`;
+	}
+	let processing = false;
+	$connectionForm.submit(function(e){
+		e.preventDefault();
+		if (!processing) {
+			processing = true;
+			connectionFormError.textContent = '';
+			if (!$connectionForm.find('input[name=id]').val()) {
+				_fetch(basePath + 'newConnection', {method: 'POST', body: new FormData(this)})
+					.then(data => {
+						if(!data.errors) {
+							bootstrap.Modal.getInstance(connectionModal).hide();
+							const connectionEl = connectionTemplate.content.cloneNode(true);
+							setConnectionData(connectionEl, data.value);
+							if(noConnections) noConnections.style.display = 'none';
+							connectionsContainer.appendChild(connectionEl);
+						} else {
+							showErrors(data.errors, 'connection_');
+						}
+					}).catch(error => {
+						console.error(error);
+						connectionFormError.textContent = 'An error occurred.';
+					}).finally(()=> processing = false);
+			} else {
+				const formData = new FormData(this);
+				$('#connectionUsers > ul > li').each(function(){
+					formData.append('userIds', $(this).data('id'));
+				});
+				_fetch(basePath + 'updateConnection', {method: 'POST', body: formData})
+					.then(data => {
+						if(data.errors) {
+							showErrors(data.errors, 'connection_');
+						} else {
+							bootstrap.Modal.getInstance(connectionModal).hide();
+							setConnectionData(
+								document.querySelector(`.connection-container[data-id="${data.value.id}"]`),
+								data.value
+							);
+						}
+					})
+					.catch(error => {
+						$('#connectionAddUserError').text('An error occurred.');
+					}).finally(() => processing = false);
+			}
 		}
+	});
+	const connectionUserIds = new Set;
+	$('#connectionsContainer').on('click', '.connection-edit', function(e){
+		_fetch(basePath + 'connectionDetails?id=' + $(this).parents('.connection-container').data('id'))
+			.then(data => {
+				$('#connectionModalLabel').text('Edit Connection');
+				for (const [name, value] of Object.entries(data)) {
+					$connectionForm.find(`[name=${name}]`).val(value);
+				}
+				$('#connectionUsers').show();
+				$('#noConnectionUsers').toggle(!data.users.length);
+				$('#connectionUsers > ul').empty();
+				$('#connectionAddUser').val('');
+				connectionUserIds.clear();
+				data.users.forEach(addConnectionUser);
+				onDriverPathChange().then(() => {
+					$connectionForm.find('input[name=driverName]').val(data.driverName);
+					new bootstrap.Modal(connectionModal).show();
+				});
+			});
+	});
+	function addConnectionUser(user) {
+		$('#connectionUsers > ul').append(
+			`<li class="list-group-item d-flex justify-content-between align-items-center"
+				data-id="${user.id}">
+				<span>${user.username} ${user.id == userId ? 
+					'<span class="text-info fw-bold fst-italic">(You)</span>': ''}
+				</span>
+				${user.id != userId ? 
+				'<span class="material-icons remove-connection-user" title="Remove User">cancel</span>' : ''}
+			</li>`);
+		connectionUserIds.add(user.id);
+	}
+	$('#connectionUsers').on('click', '.remove-connection-user', function(e){
+		const li = $(this).parent();
+		connectionUserIds.delete(li.data('id'));
+		li.remove();
+	});
+	$('#connectionAddUser').autocomplete({
+		appendTo: '#connectionModal',
+		position: {collision: "flip"},
+		source: function(request, response) {
+			_fetch(basePath + 'autocompleteUsersNotInConnection?' + new URLSearchParams({
+				connectionId: $connectionForm.find('input[name=id]').val(), text: request.term
+			})).then(users => {
+				response(users.filter(({id})=>!connectionUserIds.has(id)).map(({username}) => username));
+			}).catch(e => response([]));
+		}
+	}).on('input', function(e){
+		$('#connectionAddUserError').text('');
+	});
+	$('#connectionAddUserForm').submit(function(e){
+		e.preventDefault();
+		$('#connectionAddUser').autocomplete('close');
+		_fetch(basePath + 'userinfo?username=' + $('#connectionAddUser').val())
+			.then(data => {
+				if (data.errorMessage)
+					$('#connectionAddUserError').text(data.errorMessage)
+				else if(connectionUserIds.has(data.value.id))
+					$('#connectionAddUserError').text('User already has access to this connection.');
+				else {
+					addConnectionUser(data.value);
+					this.reset();
+				}
+			})
+			.catch(error => {
+				console.error(error);
+				$('#connectionAddUserError').text('An error occurred.');
+			});
 	});
 	const tableSelect = document.getElementById('tableSelect');
 	if (tableSelect) {
@@ -64,7 +169,6 @@
 	const driverNameContainer = document.getElementById('driverNameContainer');
 	const driverPathError = document.getElementById('driverPathError');
 	const driverNameSelect = document.getElementById('connection_driverName');
-	if(driverPathSelect) driverPathSelect.selectedIndex = -1;
 	function removeInvalid(elem) {
 		elem.classList.remove('is-invalid');
 	}
@@ -137,7 +241,7 @@
 	function onDriverPathChange() {
 		driverPathSelect.classList.remove('is-invalid');
 		driverNameContainer.style.display = 'none';
-		_fetch(basePath + 'getDrivers?' + new URLSearchParams({driverPath: driverPathSelect.value}))
+		return _fetch(basePath + 'getDrivers?' + new URLSearchParams({driverPath: driverPathSelect.value}))
 		  .then(data => {
 			for(const driver of data) {
 				const option = document.createElement('option');
@@ -155,12 +259,15 @@
 	driverPathSelect?.addEventListener('change', onDriverPathChange);
 	const statementMessage = document.getElementById('statementMessage');
 	const tableContents = document.getElementById('tableContents');
+	function getConnectionId() {
+		return new URLSearchParams(location.search).get('connection')
+	}
 	document.getElementById('statementForm')?.addEventListener('submit', function(e){
 		e.preventDefault();
 		statementMessage.textContent = '';
 		statementMessage.classList.remove('text-danger');
 		const data = new FormData(this);
-		data.append('connection', new URLSearchParams(location.search).get('connection'));
+		data.append('connection', getConnectionId());
 		_fetch(basePath + 'execute', {
 			method: 'POST', body: data
 		}).then(data => {
@@ -202,6 +309,7 @@
 				if (data.errors) {
 					showErrors(data.errors, 'newUser_');
 				} else {
+					this.reset();
 					const li = document.createElement('li');
 					li.className = 'list-group-item d-flex justify-content-between align-items-center';
 					li.textContent = data.value.username;
