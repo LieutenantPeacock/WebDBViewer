@@ -46,11 +46,17 @@ public class GrantsDbViewerApplication {
 			if (!dbViewerBase.mkdirs())
 				LOG.error("Could not create DB Viewer base folder!");
 		}
+		final String tempPassword = appProps.getTempPassword();
 		if (userRepository.count() == 0) {
 			LOG.info("New installation detected: there are currently no users.");
-			final String password = generateRandomString(8, false);
-			LOG.info("Generated temporary admin password " + ANSIEscapes.YELLOW + "[{}]" + ANSIEscapes.RESET, password);
+			final String password = tempPassword == null ? generateRandomString(8, false) : tempPassword;
+			LOG.info("{} " + ANSIEscapes.YELLOW + "[{}]" + ANSIEscapes.RESET,
+					(tempPassword == null ? "Generated temporary admin password": 
+							"Using user provided temporary password"),
+					password);
 			setupInfo.setAdminPassword(password);
+		} else if(tempPassword != null) {
+			LOG.warn("This is not a new installation; user provided temporary password is ignored.");
 		}
 	}
 
