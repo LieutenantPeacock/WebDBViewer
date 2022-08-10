@@ -48,6 +48,7 @@ import com.ltpeacock.dbviewer.commons.exceptions.DBViewerResourceNotFoundExcepti
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerRuntimeException;
 import com.ltpeacock.dbviewer.commons.exceptions.ErrorCode;
 import com.ltpeacock.dbviewer.db.CustomDriverManager;
+import com.ltpeacock.dbviewer.db.DBConstants;
 import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.TableColumn;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
@@ -121,7 +122,8 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 
 	@Transactional
 	@Override
-	public TableData getTableContents(final long connectionId, final long userId, final String tableName) {
+	public TableData getTableContents(final long connectionId, final long userId, final String tableName,
+			final int page) {
 		final DBConnectionDef def = getDef(connectionId, userId);
 		try (Connection con = driverManager.getConnection(def)) {
 			final DatabaseMetaData md = con.getMetaData();
@@ -130,22 +132,36 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 					throw new DBViewerResourceNotFoundException();
 			}
 			final String quote = md.getIdentifierQuoteString();
+			String orderBy = "";
+			try (ResultSet rs = md.getPrimaryKeys(con.getCatalog(), con.getSchema(), tableName)) {
+				if (rs.next()) 
+					orderBy = " order by " + quote + rs.getString("COLUMN_NAME") + quote;
+			}
+			final int offset = (page - 1) * DBConstants.PAGE_SIZE;
 			try (Statement statement = con.createStatement();
-					ResultSet rs = statement.executeQuery("select * from " + quote + tableName + quote)) {
-				return resultSetToTableData(rs);
+				ResultSet rs = statement.executeQuery("SELECT * FROM " + quote + tableName + quote 
+						+ orderBy + " OFFSET " + offset + " ROWS FETCH FIRST " + DBConstants.PAGE_SIZE
+						+ " ROWS ONLY")) {
+				final TableData tableData = resultSetToTableData(rs);
+				try (ResultSet rs2 = statement.executeQuery("SELECT COUNT(1) FROM " + 
+						quote + tableName + quote)) {
+					rs2.next();
+					tableData.setTotalRows(rs2.getInt(1));
+				}
+				return tableData;
 			}
 		} catch (SQLException e) {
 			throw new DBViewerRuntimeException(ErrorCode.TABLE_CONTENT_RETRIEVAL_EXCEPTION, e);
 		}
 	}
-
+	
 	private TableData resultSetToTableData(final ResultSet rs) throws SQLException {
 		final List<List<String>> rows = new ArrayList<>();
 		final ResultSetMetaData meta = rs.getMetaData();
 		final int colCount = meta.getColumnCount();
 		final List<TableColumn> columns = new ArrayList<>(colCount);
 		for(int col = 1; col <= colCount; col++) {
-			columns.add(new TableColumn(meta.getColumnName(col), 
+			columns.add(new TableColumn(meta.getColumnLabel(col), 
 					meta.getColumnTypeName(col), meta.getColumnDisplaySize(col)));
 		}
 		while (rs.next()) {

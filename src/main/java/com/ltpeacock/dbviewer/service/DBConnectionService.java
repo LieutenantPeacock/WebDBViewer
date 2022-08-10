@@ -36,7 +36,8 @@ public interface DBConnectionService {
 	MappedErrorsResponse<DBConnectionDefDTO> createConnection(final ConnectionForm form, 
 			final BindingResult result, final long userId);
 	List<String> getTables(final long connectionId, final long userId);
-	TableData getTableContents(final long connectionId, final long userId, final String tableName);
+	TableData getTableContents(final long connectionId, final long userId, final String tableName,
+			final int page);
 	SimpleResponse<QueryResult> executeQuery(final long connectionId, final long userId, 
 			final String query);
 	DBConnectionDefDTO getConnectionDetails(final long id);
