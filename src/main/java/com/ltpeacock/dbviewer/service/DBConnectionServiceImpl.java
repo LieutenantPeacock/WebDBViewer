@@ -133,13 +133,17 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 					throw new DBViewerResourceNotFoundException();
 			}
 			final String quote = md.getIdentifierQuoteString();
-			String orderBy;
+			String orderBy = "";
 			int sortColPos = -1;
 			if (sortColumn == null || dir == null || dir == SortDirection.NONE) {
-				orderBy = "";
 				try (ResultSet rs = md.getPrimaryKeys(con.getCatalog(), con.getSchema(), tableName)) {
-					if (rs.next()) 
-						orderBy = " order by " + quote + rs.getString("COLUMN_NAME") + quote;
+					StringBuilder keys = new StringBuilder();
+					while (rs.next()) {
+						if (!keys.isEmpty()) keys.append(',');
+						keys.append(quote + rs.getString("COLUMN_NAME") + quote);
+					}
+					if (!keys.isEmpty())
+						orderBy = " ORDER BY " + keys.toString();
 				}
 			} else {
 				try (ResultSet rs = md.getColumns(con.getCatalog(), con.getSchema(), tableName, sortColumn)) {
@@ -147,13 +151,15 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 						throw new DBViewerResourceNotFoundException();
 					sortColPos = rs.getInt("ORDINAL_POSITION") - 1;
 				}
-				orderBy = " order by " + quote + sortColumn + quote + " " + dir.toString();
+				orderBy = " ORDER BY " + quote + sortColumn + quote + " " + dir.toString();
 			}
 			final int offset = (page - 1) * DBConstants.PAGE_SIZE;
+			final String query = "SELECT * FROM " + quote + tableName + quote 
+					+ orderBy + " OFFSET " + offset + " ROWS FETCH FIRST " + DBConstants.PAGE_SIZE
+					+ " ROWS ONLY";
+			LOG.info("Query [{}]", query);
 			try (Statement statement = con.createStatement();
-				ResultSet rs = statement.executeQuery("SELECT * FROM " + quote + tableName + quote 
-						+ orderBy + " OFFSET " + offset + " ROWS FETCH FIRST " + DBConstants.PAGE_SIZE
-						+ " ROWS ONLY")) {
+				ResultSet rs = statement.executeQuery(query)) {
 				final TableData tableData = resultSetToTableData(rs);
 				if (sortColPos != -1)
 					tableData.getColumns().get(sortColPos).setDir(dir);
