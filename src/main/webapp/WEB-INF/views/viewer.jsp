@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="lp" uri="http://lt-peacock.com/tags"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -232,6 +233,14 @@ html, body {
 						</tbody>
 					</c:if>
 				</table>
+				<c:if test="${tableContents != null}">
+					<div id="tablePagination">
+						<lp:pagination currentPage="${currentPage}" firstPage="1" lastPage="${lastPage}"
+							rootClass="pagination justify-content-center" currentClass="active"
+							pageClass="page-item" generateDisabledLinks="true"
+							pageLinkGenerator="${pageLinkGenerator}" basePageLink="${currentUri}"/>
+					</div>
+				</c:if>
 			</div>
 		</div>
 	</div>

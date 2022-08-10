@@ -20,9 +20,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.colonelparrot.dbviewer.db.TableData;
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
 import com.ltpeacock.dbviewer.commons.RoleNames;
+import com.ltpeacock.dbviewer.db.DBConstants;
 import com.ltpeacock.dbviewer.db.DriverVO;
 import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
@@ -35,6 +38,7 @@ import com.ltpeacock.dbviewer.response.SimpleResponse;
 import com.ltpeacock.dbviewer.service.DBConnectionService;
 import com.ltpeacock.dbviewer.service.DriversService;
 import com.ltpeacock.dbviewer.service.UserService;
+import com.ltpeacock.taglib.pagination.PageLinkGenerator;
 
 /**
  * @author ColonelParrot
@@ -49,18 +53,29 @@ public class ViewController {
 	private DriversService driversService;
 	@Autowired
 	private DBConnectionService dbConnectionService;
+	@Autowired
+	private PageLinkGenerator pageLinkGenerator;
 
 	@GetMapping("/")
 	public String getStuff(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
 			final @RequestParam(required = false) String connection,
 			final @RequestParam(required = false) String table,
+			final @RequestParam(defaultValue = "1") Integer page,
 			final HttpServletRequest request) {
 		try {
 			if(connection != null) {
 				final long connectionId = Long.parseLong(connection);
 				model.addAttribute("tables", dbConnectionService.getTables(connectionId, principal.getId()));
-				if (table != null)
-					model.addAttribute("tableContents", dbConnectionService.getTableContents(connectionId, principal.getId(), table));
+				if (table != null) {
+					final TableData tableData = dbConnectionService.getTableContents(connectionId, principal.getId(), table, page);
+					model.addAttribute("tableContents", tableData);
+					model.addAttribute("currentPage", page);
+					model.addAttribute("lastPage", 
+						(tableData.getTotalRows() + DBConstants.PAGE_SIZE - 1) / DBConstants.PAGE_SIZE);
+					model.addAttribute("pageLinkGenerator", pageLinkGenerator);
+					model.addAttribute("currentUri",
+							ServletUriComponentsBuilder.fromCurrentRequest().toUriString());
+				}
 			} else if (table != null) {
 				return "redirect:/";
 			}
