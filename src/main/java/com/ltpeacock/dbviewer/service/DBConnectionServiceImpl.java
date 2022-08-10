@@ -50,6 +50,7 @@ import com.ltpeacock.dbviewer.commons.exceptions.ErrorCode;
 import com.ltpeacock.dbviewer.db.CustomDriverManager;
 import com.ltpeacock.dbviewer.db.DBConstants;
 import com.ltpeacock.dbviewer.db.QueryResult;
+import com.ltpeacock.dbviewer.db.SortDirection;
 import com.ltpeacock.dbviewer.db.TableColumn;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
@@ -123,7 +124,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 	@Transactional
 	@Override
 	public TableData getTableContents(final long connectionId, final long userId, final String tableName,
-			final int page) {
+			final int page, final String sortColumn, final SortDirection dir) {
 		final DBConnectionDef def = getDef(connectionId, userId);
 		try (Connection con = driverManager.getConnection(def)) {
 			final DatabaseMetaData md = con.getMetaData();
@@ -132,10 +133,21 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 					throw new DBViewerResourceNotFoundException();
 			}
 			final String quote = md.getIdentifierQuoteString();
-			String orderBy = "";
-			try (ResultSet rs = md.getPrimaryKeys(con.getCatalog(), con.getSchema(), tableName)) {
-				if (rs.next()) 
-					orderBy = " order by " + quote + rs.getString("COLUMN_NAME") + quote;
+			String orderBy;
+			int sortColPos = -1;
+			if (sortColumn == null || dir == null || dir == SortDirection.NONE) {
+				orderBy = "";
+				try (ResultSet rs = md.getPrimaryKeys(con.getCatalog(), con.getSchema(), tableName)) {
+					if (rs.next()) 
+						orderBy = " order by " + quote + rs.getString("COLUMN_NAME") + quote;
+				}
+			} else {
+				try (ResultSet rs = md.getColumns(con.getCatalog(), con.getSchema(), tableName, sortColumn)) {
+					if (!rs.next())
+						throw new DBViewerResourceNotFoundException();
+					sortColPos = rs.getInt("ORDINAL_POSITION") - 1;
+				}
+				orderBy = " order by " + quote + sortColumn + quote + " " + dir.toString();
 			}
 			final int offset = (page - 1) * DBConstants.PAGE_SIZE;
 			try (Statement statement = con.createStatement();
@@ -143,6 +155,8 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 						+ orderBy + " OFFSET " + offset + " ROWS FETCH FIRST " + DBConstants.PAGE_SIZE
 						+ " ROWS ONLY")) {
 				final TableData tableData = resultSetToTableData(rs);
+				if (sortColPos != -1)
+					tableData.getColumns().get(sortColPos).setDir(dir);
 				try (ResultSet rs2 = statement.executeQuery("SELECT COUNT(1) FROM " + 
 						quote + tableName + quote)) {
 					rs2.next();
@@ -182,7 +196,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 		MDC.put(CONNECTION_ID, String.valueOf(connectionId));
 		final DBConnectionDef def = getDef(connectionId, userId);
 		if (StringUtils.countMatches(query, ';') > 1) {
-			LOG.info(AUDIT, "Attempt to execute multiple statements on denied.");
+			LOG.info(AUDIT, "Attempt to execute multiple statements denied.");
 			return new SimpleResponse<>("Only one statement allowed at a time.");
 		}
 		final StopWatch sw = StopWatch.createStarted();

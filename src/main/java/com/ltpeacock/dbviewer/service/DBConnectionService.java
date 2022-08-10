@@ -23,6 +23,7 @@ import org.springframework.validation.BindingResult;
 
 import com.colonelparrot.dbviewer.db.TableData;
 import com.ltpeacock.dbviewer.db.QueryResult;
+import com.ltpeacock.dbviewer.db.SortDirection;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
@@ -37,7 +38,7 @@ public interface DBConnectionService {
 			final BindingResult result, final long userId);
 	List<String> getTables(final long connectionId, final long userId);
 	TableData getTableContents(final long connectionId, final long userId, final String tableName,
-			final int page);
+			final int page, final String sortColumn, final SortDirection dir);
 	SimpleResponse<QueryResult> executeQuery(final long connectionId, final long userId, 
 			final String query);
 	DBConnectionDefDTO getConnectionDetails(final long id);
