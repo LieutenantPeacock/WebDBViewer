@@ -223,7 +223,7 @@ html, body {
 					<form id="whereFilterForm">
 						<div class="input-group mb-3 mx-auto" style="width: 80%;">
 							<span class="input-group-text">where</span>
-							<input type="text" class="form-control" placeholder="SQL expression to filter results" value="${param.where}"/>
+							<input type="text" class="form-control" id="whereFilterInput" placeholder="SQL expression to filter results" value="${param.where}"/>
 							<button class="btn btn-secondary">Apply Filter</button>
 						</div>
 					</form>
@@ -383,6 +383,46 @@ html, body {
 		</div>
 	</div>
 	</sec:authorize>
+	<script type="module">
+		import {Textcomplete} from 'https://cdn.skypack.dev/@textcomplete/core';
+		import {TextareaEditor} from 'https://cdn.skypack.dev/@textcomplete/textarea';
+		const whereFilterInput = document.getElementById("whereFilterInput");
+		const makeTextComplete = (input, arr) => new Textcomplete(new TextareaEditor(input), [{
+				match: /\b(\w+)\b$/,
+				search: (term, callback) => {
+					term = term.toLowerCase();
+					if (term.length > 1)
+						callback(arr.filter(val => val.toLowerCase().includes(term)));
+					else 
+						callback([]);
+				},
+				replace: result => result
+			}], {
+				dropdown: {
+					item: {
+						className: "dropdown-item",
+						activeClassName: "dropdown-item active"
+					}
+				}
+			});
+		if (whereFilterInput) {
+			const columns = [
+				<c:forEach var="column" items="${tableContents.columns}">
+					"${column.name}",
+				</c:forEach>
+			];
+			makeTextComplete(whereFilterInput, columns);
+		}
+		const statementTextarea = document.getElementById('statementTextarea');
+		if (statementTextarea) {
+			const tables = [
+				<c:forEach items="${tables}" var="table">
+					"${table}",
+				</c:forEach>
+			];
+			makeTextComplete(statementTextarea, tables);
+		}
+	</script>
 	<script src="<c:url value="/resources/js/bootstrap-5.2.0.bundle.min.js"/>"></script>
 	<script src="<c:url value="/resources/js/jquery-3.6.0.min.js"/>"></script>
 	<script src="<c:url value="/resources/js/jquery-ui-1.13.2.min.js"/>"></script>
