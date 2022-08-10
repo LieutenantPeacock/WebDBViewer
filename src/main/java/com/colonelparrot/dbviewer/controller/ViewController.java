@@ -28,6 +28,7 @@ import com.ltpeacock.dbviewer.commons.RoleNames;
 import com.ltpeacock.dbviewer.db.DBConstants;
 import com.ltpeacock.dbviewer.db.DriverVO;
 import com.ltpeacock.dbviewer.db.QueryResult;
+import com.ltpeacock.dbviewer.db.SortDirection;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
@@ -61,13 +62,15 @@ public class ViewController {
 			final @RequestParam(required = false) String connection,
 			final @RequestParam(required = false) String table,
 			final @RequestParam(defaultValue = "1") Integer page,
+			final @RequestParam(required = false) String sort,
+			final @RequestParam(required = false) SortDirection dir,
 			final HttpServletRequest request) {
 		try {
 			if(connection != null) {
 				final long connectionId = Long.parseLong(connection);
 				model.addAttribute("tables", dbConnectionService.getTables(connectionId, principal.getId()));
 				if (table != null) {
-					final TableData tableData = dbConnectionService.getTableContents(connectionId, principal.getId(), table, page);
+					final TableData tableData = dbConnectionService.getTableContents(connectionId, principal.getId(), table, page, sort, dir);
 					model.addAttribute("tableContents", tableData);
 					model.addAttribute("currentPage", page);
 					model.addAttribute("lastPage", 

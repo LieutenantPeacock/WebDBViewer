@@ -18,6 +18,7 @@
 <link rel="stylesheet"
 	href="<c:url value="/resources/css/bootstrap-5.2.0.min.css"/>" />
 <link rel="stylesheet" href="<c:url value="/resources/css/jquery-ui-1.13.2.min.css"/>"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
 @import
 	url('https://fonts.googleapis.com/css?family=Bebas+Neue&display=swap');
@@ -218,7 +219,11 @@ html, body {
 						<thead>
 							<tr>
 								<c:forEach var="column" items="${tableContents.columns}">
-									<th scope="col" title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</th>
+									<c:set var="sortClasses" value="${['fa-sort', 'fa-arrow-up-short-wide', 'fa-arrow-down-wide-short']}"/>
+									<th scope="col">
+										<span title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</span>
+										<i class="fa-solid ${sortClasses[column.dir.ordinal()]} sort-icon" title="Sort on column" data-sort-idx="${column.dir.ordinal()}"></i>
+									</th>
 								</c:forEach>
 							</tr>
 						</thead>

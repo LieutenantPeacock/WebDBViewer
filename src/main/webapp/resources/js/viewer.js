@@ -304,6 +304,17 @@
 			statementMessage.textContent = 'An error occurred.';
 		});
 	});
+	const sortDir = ["NONE", "ASC", "DESC"];
+	$('#tableContents').on('click', '.sort-icon', function(e){
+		const sortIdx = (+$(this).data('sort-idx') + 1) % sortDir.length;
+		const params = new URLSearchParams(location.search);
+		params.set('sort', this.parentElement.querySelector('span').textContent);
+		if (sortIdx === 0)
+			params.delete('sort'), params.delete('dir');
+		else 
+			params.set('dir', sortDir[sortIdx]);
+		location.search = params;
+	});
 	const userFormError = document.getElementById('userFormError');
 	const usersList = document.querySelector('#usersContainer > ul');
 	const newUserModal = document.getElementById('newUserModal');
