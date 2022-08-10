@@ -243,6 +243,7 @@
 		driverNameContainer.style.display = 'none';
 		return _fetch(basePath + 'getDrivers?' + new URLSearchParams({driverPath: driverPathSelect.value}))
 		  .then(data => {
+			while (driverNameSelect.options.length) driverNameSelect.options.remove(0);
 			for(const driver of data) {
 				const option = document.createElement('option');
 				option.text = driver.name + (driver.deprecated ? ' (DEPRECATED)': '');
