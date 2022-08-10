@@ -17,6 +17,8 @@
  */
 package com.ltpeacock.dbviewer.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -27,9 +29,10 @@ import com.ltpeacock.taglib.pagination.PageLinkGenerator;
  */
 @Component
 public class TablePageLinkGenerator implements PageLinkGenerator {
+	private static final Logger LOG = LoggerFactory.getLogger(TablePageLinkGenerator.class);
 	@Override
 	public String generateLink(final String basePageLink, final int page) {
 		return UriComponentsBuilder.fromUriString(basePageLink)
-				.replaceQueryParam("page", page).toUriString();
+				.replaceQueryParam("page", page).build().toUriString();
 	}
 }
