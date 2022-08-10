@@ -1,5 +1,8 @@
 package com.colonelparrot.dbviewer;
 
+import static com.colonelparrot.dbviewer.GrantsDbViewerApplication.COLONEL_PARROT_DBVIEWER_BASE;
+import static com.colonelparrot.dbviewer.GrantsDbViewerApplication.LT_PEACOCK_DBVIEWER_BASE;
+
 import java.io.File;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -10,7 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.ltpeacock.dbviewer.commons.ANSIEscapes;
 import com.ltpeacock.dbviewer.commons.AppProperties;
@@ -21,9 +26,13 @@ import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
  * @author ColonelParrot
  * @version 1.1
  */
-@SpringBootApplication(scanBasePackages = {"com.ltpeacock.dbviewer", "com.colonelparrot.dbviewer"})
+@SpringBootApplication(scanBasePackages = {COLONEL_PARROT_DBVIEWER_BASE, LT_PEACOCK_DBVIEWER_BASE})
+@EnableJpaRepositories(LT_PEACOCK_DBVIEWER_BASE)
+@EntityScan(LT_PEACOCK_DBVIEWER_BASE)
 @EnableConfigurationProperties(AppProperties.class)
 public class GrantsDbViewerApplication {
+	static final String COLONEL_PARROT_DBVIEWER_BASE = "com.colonelparrot.dbviewer";
+	static final String LT_PEACOCK_DBVIEWER_BASE = "com.ltpeacock.dbviewer";
 	private static final Logger LOG = LoggerFactory.getLogger(GrantsDbViewerApplication.class);
 	@Autowired
 	private AppUserRepository userRepository;
