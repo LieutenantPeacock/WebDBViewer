@@ -295,6 +295,7 @@
 						$tbody.append($tr);
 					}
 					$tableContents.append($tbody);
+					statementMessage.textContent = data.value.results.message;
 				} else {
 					statementMessage.textContent = 'Updated ' + data.value.updateCount + ' rows.';
 				}

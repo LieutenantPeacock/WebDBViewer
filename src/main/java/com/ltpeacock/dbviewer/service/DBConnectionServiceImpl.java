@@ -184,7 +184,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			columns.add(new TableColumn(meta.getColumnLabel(col), 
 					meta.getColumnTypeName(col), meta.getColumnDisplaySize(col)));
 		}
-		while (rs.next()) {
+		for (int i = 0; i < DBConstants.MAX_QUERY_RESULTS && rs.next(); i++) {
 			final List<String> row = new ArrayList<>(colCount);
 			for (int col = 1; col <= colCount; col++) {
 				final Object value = rs.getObject(col);
@@ -192,7 +192,11 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			}
 			rows.add(row);
 		}
-		return new TableData(columns, rows);
+		final TableData tableData = new TableData(columns, rows);
+		if (rs.next()) {
+			tableData.setMessage("Results truncated to " + DBConstants.MAX_QUERY_RESULTS + " rows.");
+		}
+		return tableData;
 	}
 	
 	@Transactional

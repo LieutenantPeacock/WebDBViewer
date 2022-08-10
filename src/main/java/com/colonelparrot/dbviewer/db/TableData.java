@@ -12,6 +12,7 @@ public class TableData {
 	private List<TableColumn> columns;
 	private List<List<String>> rows;
 	private int totalRows;
+	private String message;
 
 	public TableData(final List<TableColumn> columns, final List<List<String>> rows) {
 		this.columns = columns;
@@ -40,5 +41,13 @@ public class TableData {
 
 	public void setTotalRows(int totalRows) {
 		this.totalRows = totalRows;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }

@@ -26,4 +26,5 @@ public class DBConstants {
 	}
 	
 	public static final int PAGE_SIZE = 50;
+	public static final int MAX_QUERY_RESULTS = 1000;
 }
