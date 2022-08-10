@@ -123,8 +123,8 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 
 	@Transactional
 	@Override
-	public TableData getTableContents(final long connectionId, final long userId, final String tableName,
-			final int page, final String sortColumn, final SortDirection dir) {
+	public SimpleResponse<TableData> getTableContents(final long connectionId, final long userId, final String tableName,
+			final int page, final String sortColumn, final SortDirection dir, final String where) {
 		final DBConnectionDef def = getDef(connectionId, userId);
 		try (Connection con = driverManager.getConnection(def)) {
 			final DatabaseMetaData md = con.getMetaData();
@@ -154,8 +154,11 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 				orderBy = " ORDER BY " + quote + sortColumn + quote + " " + dir.toString();
 			}
 			final int offset = (page - 1) * DBConstants.PAGE_SIZE;
-			final String query = "SELECT * FROM " + quote + tableName + quote 
-					+ orderBy + " OFFSET " + offset + " ROWS FETCH FIRST " + DBConstants.PAGE_SIZE
+			final String mainPart = quote + tableName + quote 
+					+ (StringUtils.isBlank(where) ? "" : " where " + where)
+					+ orderBy;
+			final String query = "SELECT * FROM " + 
+					mainPart + " OFFSET " + offset + " ROWS FETCH FIRST " + DBConstants.PAGE_SIZE
 					+ " ROWS ONLY";
 			LOG.info("Query [{}]", query);
 			try (Statement statement = con.createStatement();
@@ -164,14 +167,14 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 				if (sortColPos != -1)
 					tableData.getColumns().get(sortColPos).setDir(dir);
 				try (ResultSet rs2 = statement.executeQuery("SELECT COUNT(1) FROM " + 
-						quote + tableName + quote)) {
+						mainPart)) {
 					rs2.next();
 					tableData.setTotalRows(rs2.getInt(1));
 				}
-				return tableData;
+				return new SimpleResponse<>(tableData);
 			}
 		} catch (SQLException e) {
-			throw new DBViewerRuntimeException(ErrorCode.TABLE_CONTENT_RETRIEVAL_EXCEPTION, e);
+			return new SimpleResponse<>(e.getMessage());
 		}
 	}
 	
