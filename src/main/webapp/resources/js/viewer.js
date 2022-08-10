@@ -275,7 +275,7 @@
 				statementMessage.classList.add('text-danger');
 				statementMessage.textContent = data.errorMessage;
 			} else {
-				$('#tablePagination').hide();
+				$('#tablePagination, #whereFilterForm').remove();
 				if(data.value.results){
 					const tableData = data.value.results;
 					$tableContents.empty();
@@ -314,6 +314,12 @@
 			params.delete('sort'), params.delete('dir');
 		else 
 			params.set('dir', sortDir[sortIdx]);
+		location.search = params;
+	});
+	$('#whereFilterForm').submit(function(e){
+		e.preventDefault();
+		const params = new URLSearchParams(location.search);
+		params.set('where', $('input', this).val());
 		location.search = params;
 	});
 	const userFormError = document.getElementById('userFormError');

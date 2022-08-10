@@ -12,8 +12,6 @@
 <meta name="_csrf_header" content="${_csrf.headerName}" />
 <title>Database Viewer - Grant</title>
 <link rel="stylesheet"
-	href="<c:url value="/resources/css/style.css"/>" />
-<link rel="stylesheet"
 	href="<c:url value="/resources/css/icons/icons.css"/>" />
 <link rel="stylesheet"
 	href="<c:url value="/resources/css/bootstrap-5.2.0.min.css"/>" />
@@ -95,6 +93,11 @@ html, body {
 .remove-connection-user {
 	vertical-align: middle;
 	color: red;
+	cursor: pointer;
+}
+
+
+.sort-icon {
 	cursor: pointer;
 }
 </style>
@@ -213,7 +216,18 @@ html, body {
 						</div>
 					</div>
 				</c:if>
-				<div class="text-center" id="statementMessage"></div>
+				<div class="text-center ${tableContentsError != null ? 'text-danger' : ''}" id="statementMessage">
+					${tableContentsError}
+				</div>
+				<c:if test="${tableContents != null or tableContentsError != null}">
+					<form id="whereFilterForm">
+						<div class="input-group mb-3 mx-auto" style="width: 80%;">
+							<span class="input-group-text">where</span>
+							<input type="text" class="form-control" placeholder="SQL expression to filter results" value="${param.where}"/>
+							<button class="btn btn-secondary">Apply Filter</button>
+						</div>
+					</form>
+				</c:if>
 				<table class="table table-bordered table-hover" id="tableContents">
 					<c:if test="${tableContents != null}">
 						<thead>

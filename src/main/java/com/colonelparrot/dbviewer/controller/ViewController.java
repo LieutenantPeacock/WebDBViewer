@@ -64,20 +64,26 @@ public class ViewController {
 			final @RequestParam(defaultValue = "1") Integer page,
 			final @RequestParam(required = false) String sort,
 			final @RequestParam(required = false) SortDirection dir,
+			final @RequestParam(required = false) String where,
 			final HttpServletRequest request) {
 		try {
 			if(connection != null) {
 				final long connectionId = Long.parseLong(connection);
 				model.addAttribute("tables", dbConnectionService.getTables(connectionId, principal.getId()));
 				if (table != null) {
-					final TableData tableData = dbConnectionService.getTableContents(connectionId, principal.getId(), table, page, sort, dir);
-					model.addAttribute("tableContents", tableData);
-					model.addAttribute("currentPage", page);
-					model.addAttribute("lastPage", 
-						(tableData.getTotalRows() + DBConstants.PAGE_SIZE - 1) / DBConstants.PAGE_SIZE);
-					model.addAttribute("pageLinkGenerator", pageLinkGenerator);
-					model.addAttribute("currentUri",
-							ServletUriComponentsBuilder.fromCurrentRequest().toUriString());
+					final SimpleResponse<TableData> res = dbConnectionService.getTableContents(connectionId, principal.getId(), table, page, sort, dir, where);
+					if (res.getErrorMessage() == null) {
+						final TableData tableData = res.getValue();
+						model.addAttribute("tableContents", tableData);
+						model.addAttribute("currentPage", page);
+						model.addAttribute("lastPage", 
+							(tableData.getTotalRows() + DBConstants.PAGE_SIZE - 1) / DBConstants.PAGE_SIZE);
+						model.addAttribute("pageLinkGenerator", pageLinkGenerator);
+						model.addAttribute("currentUri",
+								ServletUriComponentsBuilder.fromCurrentRequest().build().toUriString());
+					} else {
+						model.addAttribute("tableContentsError", res.getErrorMessage());
+					}
 				}
 			} else if (table != null) {
 				return "redirect:/";
