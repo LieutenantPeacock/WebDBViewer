@@ -11,6 +11,7 @@ import com.ltpeacock.dbviewer.db.TableColumn;
 public class TableData {
 	private List<TableColumn> columns;
 	private List<List<String>> rows;
+	private int totalRows;
 
 	public TableData(final List<TableColumn> columns, final List<List<String>> rows) {
 		this.columns = columns;
@@ -31,5 +32,13 @@ public class TableData {
 
 	public void setRows(List<List<String>> rows) {
 		this.rows = rows;
+	}
+
+	public int getTotalRows() {
+		return totalRows;
+	}
+
+	public void setTotalRows(int totalRows) {
+		this.totalRows = totalRows;
 	}
 }
