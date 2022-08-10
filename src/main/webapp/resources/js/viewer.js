@@ -258,7 +258,7 @@
 	}
 	driverPathSelect?.addEventListener('change', onDriverPathChange);
 	const statementMessage = document.getElementById('statementMessage');
-	const tableContents = document.getElementById('tableContents');
+	const $tableContents = $('#tableContents');
 	function getConnectionId() {
 		return new URLSearchParams(location.search).get('connection')
 	}
@@ -278,19 +278,23 @@
 				$('#tablePagination').hide();
 				if(data.value.results){
 					const tableData = data.value.results;
-					tableContents.innerHTML = 
-`<thead>
-	<tr>
-		${tableData.columns.map(column => 
-			`<th scope="col" title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</th>`)
-			.join('')}
-	</tr>
-</thead>
-<tbody>
-	${tableData.rows.map(row => "<tr>" + 
-		row.map(val => "<td>" + val + "</td>").join('')
-		+ "</tr>").join('')}
-</tbody>`;
+					$tableContents.empty();
+					const $thead = $('<thead/>');
+					const $theadrow = $('<tr/>');
+					for (const column of tableData.columns) {
+						$theadrow.append(`<th scope="col"><span title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</span></th>`);
+					}
+					$thead.append($theadrow);
+					$tableContents.append($thead);
+					const $tbody = $('<tbody/>');
+					for (const row of tableData.rows) {
+						const $tr = $('<tr/>');
+						for (const val of row) {
+							$tr.append("<td>" + val + "</td>");
+						}
+						$tbody.append($tr);
+					}
+					$tableContents.append($tbody);
 				} else {
 					statementMessage.textContent = 'Updated ' + data.value.updateCount + ' rows.';
 				}
