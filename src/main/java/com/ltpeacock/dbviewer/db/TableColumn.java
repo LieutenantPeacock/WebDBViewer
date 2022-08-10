@@ -24,6 +24,7 @@ public class TableColumn {
 	private final String name;
 	private final String typeName;
 	private final int displaySize;
+	private SortDirection dir = SortDirection.NONE;
 
 	public TableColumn(final String name, final String typeName, final int displaySize) {
 		this.name = name;
@@ -41,5 +42,13 @@ public class TableColumn {
 
 	public int getDisplaySize() {
 		return displaySize;
+	}
+
+	public SortDirection getDir() {
+		return dir;
+	}
+
+	public void setDir(SortDirection dir) {
+		this.dir = dir;
 	}
 }
