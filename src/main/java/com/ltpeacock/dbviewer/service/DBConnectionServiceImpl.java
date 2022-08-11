@@ -139,10 +139,10 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 				try (ResultSet rs = md.getPrimaryKeys(con.getCatalog(), con.getSchema(), tableName)) {
 					StringBuilder keys = new StringBuilder();
 					while (rs.next()) {
-						if (!keys.isEmpty()) keys.append(',');
+						if (keys.length() != 0) keys.append(',');
 						keys.append(quote + rs.getString("COLUMN_NAME") + quote);
 					}
-					if (!keys.isEmpty())
+					if (keys.length() != 0)
 						orderBy = " ORDER BY " + keys.toString();
 				}
 			} else {
