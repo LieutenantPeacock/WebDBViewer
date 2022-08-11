@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +47,7 @@ import com.ltpeacock.taglib.pagination.PageLinkGenerator;
  * @version 1.1
  */
 @Controller
+@PreAuthorize("isAuthenticated()")
 public class ViewController {
 	private static final Logger LOG = LoggerFactory.getLogger(ViewController.class);
 	@Autowired

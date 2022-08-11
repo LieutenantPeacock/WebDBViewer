@@ -27,7 +27,8 @@ public class WebSecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 		http.authorizeRequests().antMatchers("/setup").permitAll()
-				.anyRequest().authenticated().and().formLogin().loginPage("/login").permitAll().and()
+				.antMatchers("/").authenticated()
+				.and().formLogin().loginPage("/login").permitAll().and()
 				.rememberMe().rememberMeParameter("remember-me").and().logout().logoutUrl("/logout")
 				.logoutSuccessUrl("/");
 		return http.build();
