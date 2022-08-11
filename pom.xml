@@ -13,8 +13,8 @@
 	<artifactId>dbviewer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>dbviewer</name>
-	<description>Database viewer</description>
+	<name>DBViewer</name>
+	<description>SQL database viewer.</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
