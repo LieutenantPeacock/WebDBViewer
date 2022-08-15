@@ -20,7 +20,6 @@ package com.ltpeacock.dbviewer.db;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -44,7 +43,7 @@ import com.ltpeacock.dbviewer.service.DriversService;
 @Component
 public class CustomDriverManager {
 	private static final Logger LOG = LoggerFactory.getLogger(CustomDriverManager.class);
-	private final Map<DriverFromFile, Driver> drivers = new ConcurrentHashMap<>();
+	private final Map<String, ClassLoader> classLoaders = new ConcurrentHashMap<>();
 	@Autowired
 	private DriversService driversService;
 
@@ -55,22 +54,27 @@ public class CustomDriverManager {
 
 	public Connection getConnection(final String driverPath, final String driverClassName, final String url,
 			final String username, final String password) {
-		final Driver driver = drivers.computeIfAbsent(new DriverFromFile(driverPath, driverClassName), k -> {
-			try (URLClassLoader ucl = this.driversService.getClassLoader(new File(driverPath))) {
-				return (Driver) Class.forName(driverClassName, true, ucl).getDeclaredConstructor().newInstance();
-			} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException
-					| ClassNotFoundException | IOException e) {
-				LOG.error("Could not load Driver [{}] from path [{}]", driverClassName, driverPath);
-				throw new DBViewerRuntimeException(ErrorCode.DRIVER_INITIALIZATION_ERROR, e);
-			}
-		});
+		final ClassLoader loader = classLoaders.computeIfAbsent(driverPath, 
+				k -> {
+					try {
+						return this.driversService.getClassLoader(new File(driverPath));
+					} catch (IOException e) {
+						LOG.error("Could not get class loader for path [{}]", driverPath);
+						throw new DBViewerRuntimeException(ErrorCode.CLASSLOADER_CREATION_ERROR, e);
+					}
+				});
 		try {
 			final Properties props = new Properties();
 			props.put("user", username);
 			props.put("password", password);
+			final Driver driver = (Driver) Class.forName(driverClassName, true, loader).getDeclaredConstructor().newInstance();
 			return driver.connect(url, props);
 		} catch (SQLException e) {
 			throw new DBViewerRuntimeException(ErrorCode.CONNECTION_FAILED, e);
+		} catch (InstantiationException | IllegalAccessException| InvocationTargetException | 
+				NoSuchMethodException | ClassNotFoundException e) {
+			LOG.error("Could not load driver [{}] from path [{}]", driverClassName, driverPath);
+			throw new DBViewerRuntimeException(ErrorCode.DRIVER_INITIALIZATION_ERROR, e);
 		}
 	}
 }
