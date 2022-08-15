@@ -23,11 +23,11 @@ package com.ltpeacock.dbviewer.response;
 public class SimpleResponse<T> {
 	private T value;
 	private String errorMessage;
-	
+
 	public SimpleResponse(final T value) {
 		this.value = value;
 	}
-	
+
 	public SimpleResponse(final String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
@@ -38,5 +38,13 @@ public class SimpleResponse<T> {
 
 	public String getErrorMessage() {
 		return errorMessage;
+	}
+
+	public static <T> SimpleResponse<T> withValue(final T value) {
+		return new SimpleResponse<>(value);
+	}
+	
+	public static <T> SimpleResponse<T> withErrorMessage(final String errorMessage) {
+		return new SimpleResponse<>(errorMessage);
 	}
 }
