@@ -1,0 +1,6 @@
+.tooltip-danger {
+	--bs-tooltip-bg: var(--bs-danger);
+}
+.tooltip-success {
+	--bs-tooltip-bg: var(--bs-success);
+}
