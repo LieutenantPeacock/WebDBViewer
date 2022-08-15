@@ -28,7 +28,8 @@ public class AppProperties {
 	private String dbDir = "./" + appRoot + "/db"; // implicit relative paths not allowed by H2
 	private String driversDir = appRoot + "/ext/drivers";
 	private String tempPassword;
-
+	private String confDir = appRoot + "/conf";
+	
 	public String getAppRoot() {
 		return appRoot;
 	}
@@ -59,5 +60,13 @@ public class AppProperties {
 
 	public void setTempPassword(String tempPassword) {
 		this.tempPassword = tempPassword;
+	}
+
+	public String getConfDir() {
+		return confDir;
+	}
+
+	public void setConfDir(String confDir) {
+		this.confDir = confDir;
 	}
 }
