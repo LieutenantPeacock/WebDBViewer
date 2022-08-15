@@ -17,7 +17,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.ltpeacock.dbviewer.commons.ANSIEscapes;
 import com.ltpeacock.dbviewer.commons.AppProperties;
 import com.ltpeacock.dbviewer.commons.SetupInfo;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
@@ -50,8 +49,7 @@ public class GrantsDbViewerApplication {
 		final File dbViewerBase = new File(appProps.getAppRoot());
 		LOG.info("DB Viewer base folder located at [{}]", dbViewerBase.getAbsolutePath());
 		if (!dbViewerBase.exists()) {
-			LOG.info(ANSIEscapes.YELLOW + "[STARTUP CONFIGURATION]" + ANSIEscapes.RESET
-					+ " No existing base folder found; automatically creating one.");
+			LOG.info("[STARTUP CONFIGURATION] No existing base folder found; automatically creating one.");
 			if (!dbViewerBase.mkdirs())
 				LOG.error("Could not create DB Viewer base folder!");
 		}
@@ -59,7 +57,7 @@ public class GrantsDbViewerApplication {
 		if (userRepository.count() == 0) {
 			LOG.info("New installation detected: there are currently no users.");
 			final String password = tempPassword == null ? generateRandomString(8, false) : tempPassword;
-			LOG.info("{} " + ANSIEscapes.YELLOW + "[{}]" + ANSIEscapes.RESET,
+			LOG.info("<<< {} [{}] >>>",
 					(tempPassword == null ? "Generated temporary admin password": 
 							"Using user provided temporary password"),
 					password);
