@@ -1,0 +1,15 @@
+<!DOCTYPE dbconfig>
+<dbconfig>
+	<database name="MariaDB">
+		<url-format>jdbc:mariadb://host:port/dbname</url-format>
+	</database>
+	<database name="MySQL">
+		<url-format>jdbc:mysql://host:port/dbname</url-format>
+	</database>
+	<database name="SQL Server">
+		<url-format>jdbc:sqlserver://host:port;databaseName=dbname</url-format>
+	</database>
+	<database name="Db2">
+		<url-format>jdbc:db2://host:port/dbname</url-format>
+	</database>
+</dbconfig>
