@@ -37,6 +37,8 @@ public class DBConnectionDef {
 	private long id;
 	@Column(length = 200)
 	private String name;
+	@Column(length = 100)
+	private String type;
 	@Column(length = 1000)
 	private String url;
 	@Column(length = 1000)
@@ -64,6 +66,14 @@ public class DBConnectionDef {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public String getUrl() {

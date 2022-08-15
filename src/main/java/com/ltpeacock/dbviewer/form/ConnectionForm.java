@@ -27,6 +27,7 @@ import javax.validation.constraints.NotBlank;
 public class ConnectionForm {
 	@NotBlank(message = "Connection name must not be blank.")
 	private String name;
+	private String type;
 	@NotBlank(message = "JDBC URL must not be blank.")
 	private String url;
 	private String username;
@@ -44,6 +45,14 @@ public class ConnectionForm {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	public String getUrl() {
