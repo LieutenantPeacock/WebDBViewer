@@ -44,4 +44,5 @@ public interface DBConnectionService {
 	DBConnectionDefDTO getConnectionDetails(final long id);
 	MappedMultiErrorsResponse<DBConnectionDefDTO> updateConnection(final ConnectionForm form, 
 			final BindingResult result);
+	SimpleResponse<String> testConnection(final ConnectionForm form, final long userId);
 }

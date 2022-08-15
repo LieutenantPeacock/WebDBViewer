@@ -20,8 +20,12 @@ package com.ltpeacock.dbviewer.service;
 import static com.ltpeacock.dbviewer.commons.LogMarkers.AUDIT;
 import static com.ltpeacock.dbviewer.commons.MDCKeys.CONNECTION_ID;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -29,7 +33,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
@@ -43,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import com.colonelparrot.dbviewer.db.TableData;
+import com.ltpeacock.dbviewer.commons.RoleNames;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerAccessNotAllowedException;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerResourceNotFoundException;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerRuntimeException;
@@ -75,6 +83,10 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 	private AppUserRepository userRepository;
 	@Autowired
 	private CustomDriverManager driverManager;
+	@Autowired
+	private DriversService driversService;
+	@Autowired
+	private HttpServletRequest request;
 
 	@Override
 	public MappedErrorsResponse<DBConnectionDefDTO> createConnection(final ConnectionForm form,
@@ -253,5 +265,33 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 		BeanUtils.copyProperties(form, connectionDef, "id", "userIds");
 		connectionDef.setUsers(userRepository.findAllById(form.getUserIds()));
 		return new MappedMultiErrorsResponse<>(new DBConnectionDefDTO(dbConnectionDefRepository.save(connectionDef)));
+	}
+
+	@Override
+	public SimpleResponse<String> testConnection(final ConnectionForm form, final long userId) {
+		if (StringUtils.isBlank(form.getUrl()))
+			return SimpleResponse.withErrorMessage("JDBC URL is blank!");
+		if (StringUtils.isBlank(form.getDriverPath()) || StringUtils.isBlank(form.getDriverName()))
+			return SimpleResponse.withErrorMessage("Please choose the JDBC Driver!");
+		if (!request.isUserInRole(RoleNames.ADMIN)) {
+			final DBConnectionDef connectionDef = getDef(form.getId(), userId);
+			BeanUtils.copyProperties(connectionDef, form, "users");
+		}
+		try {
+			final ClassLoader loader = driversService.getClassLoader(new File(form.getDriverPath()));
+			final Driver driver = (Driver) Class.forName(form.getDriverName(), true, loader).getDeclaredConstructor().newInstance();
+			final Properties props = new Properties();
+			props.put("user", form.getUsername());
+			props.put("password", form.getPassword());
+			driver.connect(form.getUrl(), props);
+			return SimpleResponse.withValue("Successfully connected!");
+		} catch (IOException e) {
+			return SimpleResponse.withErrorMessage("Could not get ClassLoader for JAR: " + e.getMessage());
+		}  catch (InstantiationException | IllegalAccessException  | InvocationTargetException
+				| NoSuchMethodException | ClassNotFoundException e) {
+			return SimpleResponse.withErrorMessage("Could not load driver from JAR: " + e.getMessage());
+		} catch (SQLException e) {
+			return SimpleResponse.withErrorMessage("Could not connect: " + e.getMessage());
+		}
 	}
 }
