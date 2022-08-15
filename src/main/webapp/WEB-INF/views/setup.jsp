@@ -36,8 +36,8 @@
     margin-bottom: 0;
 }
 .header p {
-    margin-top: 0px;
-    font-size: 25px;
+    margin-top: 5px;
+    font-size: 1.4em;
 }
 .setup-modal .setup-form {
     text-align: center;
