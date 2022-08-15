@@ -60,7 +60,7 @@ public class ViewController {
 	private PageLinkGenerator pageLinkGenerator;
 
 	@GetMapping("/")
-	public String getStuff(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
+	public String viewer(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
 			final @RequestParam(required = false) String connection,
 			final @RequestParam(required = false) String table,
 			final @RequestParam(defaultValue = "1") Integer page,
