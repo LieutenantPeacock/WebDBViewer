@@ -13,6 +13,7 @@
 <title>Database Viewer - Grant</title>
 <link rel="stylesheet"
 	href="<c:url value="/resources/css/icons/icons.css"/>" />
+<link rel="stylesheet" href="<c:url value="/resources/css/style.css"/>"/>
 <link rel="stylesheet"
 	href="<c:url value="/resources/css/bootstrap-5.2.0.min.css"/>" />
 <link rel="stylesheet" href="<c:url value="/resources/css/jquery-ui-1.13.2.min.css"/>"/>
@@ -99,6 +100,15 @@ html, body {
 
 .sort-icon {
 	cursor: pointer;
+}
+
+#testConnectionBtn {
+	background-color: #02f702;
+	border: none;
+}
+
+#testConnectionBtn:hover {
+	background-color: #2de810;
 }
 </style>
 </head>
@@ -281,6 +291,15 @@ html, body {
 					  	<input type="text" class="form-control" id="connection_name" name="name" required/>
 					  	<div class="invalid-feedback">Please enter a name for the new connection.</div>
 					  </div>
+					  <div class="input-group mb-3">
+					  	<label for="connection_type" class="input-group-text">Database Type</label>
+					  	<select class="form-select" id="connection_type" name="type">
+							<c:forEach var="db" items="${databases}">
+								<option value="${db.name}" data-url-format="${db.urlFormat}">${db.name}</option>
+							</c:forEach>
+					  		<option value="other" selected>Other</option>
+					  	</select>	
+					  </div>
 					  <div class="mb-3">
 					    <label for="connection_url" class="form-label">JDBC URL</label>
 					    <input type="text" class="form-control" id="connection_url" name="url" required/>
@@ -342,6 +361,7 @@ html, body {
 					</div>
 				</div>
 				<div class="modal-footer">
+					<button type="button" class="btn me-auto" id="testConnectionBtn">Test Connection</button>
 					<button type="button" class="btn btn-secondary"
 						data-bs-dismiss="modal">Close</button>
 					<button type="submit" class="btn btn-outline-success" form="connectionForm">Save</button>

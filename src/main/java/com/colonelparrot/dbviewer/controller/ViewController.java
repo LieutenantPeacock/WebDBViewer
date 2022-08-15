@@ -25,6 +25,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.colonelparrot.dbviewer.db.TableData;
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
+import com.ltpeacock.dbviewer.commons.DBConfig;
 import com.ltpeacock.dbviewer.commons.RoleNames;
 import com.ltpeacock.dbviewer.db.DBConstants;
 import com.ltpeacock.dbviewer.db.DriverVO;
@@ -58,6 +59,8 @@ public class ViewController {
 	private DBConnectionService dbConnectionService;
 	@Autowired
 	private PageLinkGenerator pageLinkGenerator;
+	@Autowired
+	private DBConfig dbConfig;
 
 	@GetMapping("/")
 	public String viewer(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
@@ -93,6 +96,7 @@ public class ViewController {
 		} catch(NumberFormatException e) {
 			return "redirect:/";
 		}
+		model.addAttribute("databases", dbConfig.getDatabases());
 		model.addAttribute("connections", userService.getConnections(principal.getId()));
 		model.addAttribute("drivers", driversService.getDriverPaths());
 		if (request.isUserInRole(RoleNames.ADMIN)) {
@@ -102,7 +106,7 @@ public class ViewController {
 	}
 	
 	@PostMapping("/uploadDriver")
-	@Secured("ROLE_ADMIN")
+	@Secured(RoleNames.ADMIN)
 	@ResponseBody
 	public MappedErrorsResponse<String> uploadDriver(final MultipartFile[] files, @RequestParam final String folder) {
 		LOG.info("Uploaded {} files", files.length);
@@ -116,7 +120,7 @@ public class ViewController {
 	}
 	
 	@PostMapping("/newConnection")
-	@Secured("ROLE_ADMIN")
+	@Secured(RoleNames.ADMIN)
 	@ResponseBody
 	public MappedErrorsResponse<DBConnectionDefDTO> newConnection(@Valid final ConnectionForm form, final BindingResult result, @AuthenticationPrincipal final AppUserPrincipal principal) {
 		return this.dbConnectionService.createConnection(form, result, principal.getId());
@@ -137,21 +141,21 @@ public class ViewController {
 	}
 	
 	@GetMapping("/connectionDetails")
-	@Secured("ROLE_ADMIN")
+	@Secured(RoleNames.ADMIN)
 	@ResponseBody
 	public DBConnectionDefDTO getConnectionDetails(@RequestParam final long id) {
 		return this.dbConnectionService.getConnectionDetails(id);
 	}
 	
 	@GetMapping("/autocompleteUsersNotInConnection")
-	@Secured("ROLE_ADMIN")
+	@Secured(RoleNames.ADMIN)
 	@ResponseBody
 	public List<AppUserDTO> autocompleteUsers(@RequestParam final String text, @RequestParam final long connectionId){
 		return this.userService.findUsersNotInConnectionWithSimilarUsername(connectionId, text);
 	}
 	
 	@GetMapping("/userinfo")
-	@Secured("ROLE_ADMIN")
+	@Secured(RoleNames.ADMIN)
 	@ResponseBody
 	public SimpleResponse<AppUserDTO> userInfo(@RequestParam final String username) {
 		return this.userService.getUserInfo(username);
@@ -162,5 +166,12 @@ public class ViewController {
 	@ResponseBody
 	public MappedMultiErrorsResponse<DBConnectionDefDTO> updateConnection(final @Valid ConnectionForm form, final BindingResult result) {
 		return this.dbConnectionService.updateConnection(form, result);
+	}
+	
+	@PostMapping("/testConnection")
+	@ResponseBody
+	public SimpleResponse<String> testConnection(final ConnectionForm form, 
+			@AuthenticationPrincipal final AppUserPrincipal principal) {
+		return this.dbConnectionService.testConnection(form, principal.getId());
 	}
 }

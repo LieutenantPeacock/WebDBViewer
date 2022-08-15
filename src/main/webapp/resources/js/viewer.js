@@ -16,6 +16,9 @@
 	const noConnections = document.getElementById('noConnections');
 	const connectionsContainer = document.getElementById('connectionsContainer');
 	const $connectionForm = $('#connectionForm');
+	connectionModal.addEventListener('hide.bs.modal', function(e){
+		$(this).find('.modal-footer > .alert').remove();
+	});
 	$('#newConnectionBtn').click(function(e){
 		$connectionForm[0].reset();
 		$('#connectionModalLabel').text('New Connection');
@@ -80,6 +83,30 @@
 					}).finally(() => processing = false);
 			}
 		}
+	});
+	const $connection_url = $('#connection_url');
+	const jdbcUrlFormats = new Set([...document.querySelectorAll('#connection_type > option')]
+		.map(el => el.dataset.urlFormat).filter(Boolean));
+	$('#connection_type').change(function(e){
+		if (!$connection_url.val().trim() || jdbcUrlFormats.has($connection_url.val()))
+			$connection_url.val($('option:checked', this).data('url-format'));
+	});
+	$('#testConnectionBtn').click(function(e){
+		const showAlert = (type, message)=>{
+			$(this).parent().find('.alert').remove();
+			$(this).parent().append(
+`<div class="alert alert-dismissible alert-${type} w-100" role="alert">
+	<div>${message}</div>
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>`
+			);
+		};
+		_fetch(basePath + 'testConnection', {method: 'POST', body: new FormData($connectionForm[0])})
+			.then(data => {
+				showAlert(data.errorMessage ? 'danger' : 'success', data.value || data.errorMessage);
+			}).catch(err => {
+				showAlert('danger', 'An error occurred while attempting to test the connection.');
+			});
 	});
 	const connectionUserIds = new Set;
 	$('#connectionsContainer').on('click', '.connection-edit', function(e){
