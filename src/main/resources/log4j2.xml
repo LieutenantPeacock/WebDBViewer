@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" strict="true"
+	name="DBViewer_Log" monitorInterval="5"
+	xmlns:xi="http://www.w3.org/2001/XInclude">
+	<Properties>
+		<Property name="log.pattern">%d R=%r %-5p [%t] [%marker] %X %c.%M:%L - %m%n</Property>
+		<Property name="fileName">DBViewer</Property>
+		<Property name="logPath">.dbviewer/logs</Property>
+	</Properties>
+	<Appenders>
+		<Console name="STDOUT">
+			<PatternLayout pattern="${log.pattern}"/>
+			<Filters>
+				<ThresholdFilter level="INFO" onMatch="ACCEPT"
+					onMismatch="DENY" />
+			</Filters>
+		</Console>
+		<RollingFile name="File"
+			fileName="${logPath}/${fileName}.log"
+			filePattern="${logPath}/${fileName}_%d{yyyyMMdd}-%i.log.gz">
+			<PatternLayout pattern="${log.pattern}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Logger name="org" level="info" />
+		<Logger name="org.springframework" level="info" />
+		<Logger name="org.hibernate" level="info" />
+		<Logger name="com.mchange" level="info" />
+		<Logger name="com.zaxxer.hikari" level="info" />
+		<Logger name="org.apache.catalina.core.ContainerBase"
+			level="info" additivity="false">
+			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="File" />
+		</Logger>
+
+		<Root level="debug">
+			<AppenderRef ref="STDOUT" />
+			<AppenderRef ref="File" />
+		</Root>
+	</Loggers>
+</Configuration>
