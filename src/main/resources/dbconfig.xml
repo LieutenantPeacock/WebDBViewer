@@ -14,6 +14,9 @@
 	<database name="Db2">
 		<url-format>jdbc:db2://host:port/dbname</url-format>
 	</database>
+	<database name="Oracle">
+		<url-format>jdbc:oracle:thin:@host:port/dbname</url-format>
+	</database>
 	<default>
 		<pagination-format>OFFSET $offset ROWS FETCH FIRST $pagesize ROWS ONLY</pagination-format>
 	</default>
