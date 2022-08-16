@@ -27,6 +27,7 @@ import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 public class DBConnectionDefDTO {
 	private final long id;
 	private final String name;
+	private final String type;
 	private final String url;
 	private final String driverPath;
 	private final String driverName;
@@ -37,6 +38,7 @@ public class DBConnectionDefDTO {
 	public DBConnectionDefDTO(final DBConnectionDef def) {
 		this.id = def.getId();
 		this.name = def.getName();
+		this.type = def.getType();
 		this.url = def.getUrl();
 		this.driverPath = def.getDriverPath();
 		this.driverName = def.getDriverName();
@@ -50,6 +52,10 @@ public class DBConnectionDefDTO {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getType() {
+		return type;
 	}
 
 	public String getUrl() {
