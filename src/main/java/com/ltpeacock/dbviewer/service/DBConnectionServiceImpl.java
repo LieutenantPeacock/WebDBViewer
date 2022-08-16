@@ -186,6 +186,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 				return new SimpleResponse<>(tableData);
 			}
 		} catch (SQLException e) {
+			LOG.warn("SQLException [{}]", Util.toOneLine(e));
 			return new SimpleResponse<>(e.getMessage());
 		}
 	}
@@ -235,6 +236,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			success = true;
 			return response;
 		} catch (SQLException e) {
+			LOG.warn("SQLException [{}]", Util.toOneLine(e));
 			return new SimpleResponse<>(e.getMessage());
 		} finally {
 			sw.stop();
