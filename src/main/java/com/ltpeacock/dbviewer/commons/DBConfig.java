@@ -17,7 +17,9 @@
  */
 package com.ltpeacock.dbviewer.commons;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -31,6 +33,8 @@ public class DBConfig {
 		private String name;
 		@JacksonXmlProperty(localName = "url-format")
 		private String urlFormat;
+		@JacksonXmlProperty(localName = "pagination-format")
+		private String paginationFormat;
 
 		public String getName() {
 			return name;
@@ -48,26 +52,47 @@ public class DBConfig {
 			this.urlFormat = urlFormat;
 		}
 
+		public String getPaginationFormat() {
+			return paginationFormat;
+		}
+
+		public void setPaginationFormat(String paginationFormat) {
+			this.paginationFormat = paginationFormat;
+		}
+
 		@Override
 		public String toString() {
-			return "Database [name=" + name + ", urlFormat=" + urlFormat + "]";
+			return "Database [name=" + name + ", urlFormat=" + urlFormat + ", paginationFormat=" + paginationFormat
+					+ "]";
 		}
 	}
 
+	private Map<String, Database> databases = new LinkedHashMap<>();
+	@JacksonXmlProperty(localName = "default")
+	private Database defaults;
+	
 	@JacksonXmlProperty(localName = "database")
 	@JacksonXmlElementWrapper(useWrapping = false)
-	private List<Database> databases;
+	public void setDatabases(final List<Database> databases) {
+		for (final Database db : databases) {
+			this.databases.put(db.name, db);
+		}
+	}
 
-	public List<Database> getDatabases() {
+	public Map<String, Database> getDatabases() {
 		return databases;
 	}
 
-	public void setDatabases(List<Database> databases) {
-		this.databases = databases;
+	public Database getDefaults() {
+		return defaults;
+	}
+
+	public void setDefaults(Database defaults) {
+		this.defaults = defaults;
 	}
 
 	@Override
 	public String toString() {
-		return "DBConfig [databases=" + databases + "]";
+		return "DBConfig [databases=" + databases + ", defaults=" + defaults + "]";
 	}
 }

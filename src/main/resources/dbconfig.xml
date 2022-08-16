@@ -2,9 +2,11 @@
 <dbconfig>
 	<database name="MariaDB">
 		<url-format>jdbc:mariadb://host:port/dbname</url-format>
+		<pagination-format>LIMIT $offset, $pagesize</pagination-format>
 	</database>
 	<database name="MySQL">
 		<url-format>jdbc:mysql://host:port/dbname</url-format>
+		<pagination-format>LIMIT $offset, $pagesize</pagination-format>
 	</database>
 	<database name="SQL Server">
 		<url-format>jdbc:sqlserver://host:port;databaseName=dbname</url-format>
@@ -12,4 +14,7 @@
 	<database name="Db2">
 		<url-format>jdbc:db2://host:port/dbname</url-format>
 	</database>
+	<default>
+		<pagination-format>OFFSET $offset ROWS FETCH FIRST $pagesize ROWS ONLY</pagination-format>
+	</default>
 </dbconfig>
