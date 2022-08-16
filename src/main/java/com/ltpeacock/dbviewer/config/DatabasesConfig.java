@@ -47,6 +47,8 @@ public class DatabasesConfig {
 			FileUtils.copyInputStreamToFile(new ClassPathResource(dbConfigName).getInputStream(), dbConfigFile);
 		}
 		final XmlMapper xmlMapper = new XmlMapper();
-		return xmlMapper.readValue(dbConfigFile, DBConfig.class);
+		final DBConfig dbConfig = xmlMapper.readValue(dbConfigFile, DBConfig.class);
+		LOG.info("{}", dbConfig);
+		return dbConfig;
 	}
 }
