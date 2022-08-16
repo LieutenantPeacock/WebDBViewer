@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,5 +63,13 @@ public class Util {
 				: NEWLINE_PAT.matcher(
 					CARRIAGE_RETURN_PAT.matcher(str).replaceAll("\\R")
 				).replaceAll("\\N");
+	}
+	
+	public static String toOneLine(final Throwable t) {
+		return replaceLineBreaks(ExceptionUtils.getStackTrace(t));
+	}
+	
+	public static String toOneLine(final Object o) {
+		return replaceLineBreaks(String.valueOf(o));
 	}
 }
