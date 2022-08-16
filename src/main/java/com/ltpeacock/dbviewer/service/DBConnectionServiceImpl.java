@@ -50,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
 import com.colonelparrot.dbviewer.db.TableData;
+import com.ltpeacock.dbviewer.commons.DBConfig;
 import com.ltpeacock.dbviewer.commons.RoleNames;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerAccessNotAllowedException;
 import com.ltpeacock.dbviewer.commons.exceptions.DBViewerResourceNotFoundException;
@@ -87,6 +88,8 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 	private DriversService driversService;
 	@Autowired
 	private HttpServletRequest request;
+	@Autowired
+	private DBConfig dbConfig;
 
 	@Override
 	public MappedErrorsResponse<DBConnectionDefDTO> createConnection(final ConnectionForm form,
@@ -169,9 +172,11 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			final String mainPart = quote + tableName + quote 
 					+ (StringUtils.isBlank(where) ? "" : " where " + where)
 					+ orderBy;
+			final DBConfig.Database db = dbConfig.getDatabases().getOrDefault(def.getType(), dbConfig.getDefaults());
 			final String query = "SELECT * FROM " + 
-					mainPart + " OFFSET " + offset + " ROWS FETCH FIRST " + DBConstants.PAGE_SIZE
-					+ " ROWS ONLY";
+					mainPart + " " + 
+					db.getPaginationFormat().replace("$offset", String.valueOf(offset))
+											.replace("$pagesize", String.valueOf(DBConstants.PAGE_SIZE));
 			LOG.info("Query [{}]", query);
 			try (Statement statement = con.createStatement();
 				ResultSet rs = statement.executeQuery(query)) {
