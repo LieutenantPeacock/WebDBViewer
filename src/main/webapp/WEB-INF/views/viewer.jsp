@@ -295,7 +295,7 @@ html, body {
 					  	<label for="connection_type" class="input-group-text">Database Type</label>
 					  	<select class="form-select" id="connection_type" name="type">
 							<c:forEach var="db" items="${databases}">
-								<option value="${db.name}" data-url-format="${db.urlFormat}">${db.name}</option>
+								<option value="${db.key}" data-url-format="${db.value.urlFormat}">${db.key}</option>
 							</c:forEach>
 					  		<option value="other" selected>Other</option>
 					  	</select>	
