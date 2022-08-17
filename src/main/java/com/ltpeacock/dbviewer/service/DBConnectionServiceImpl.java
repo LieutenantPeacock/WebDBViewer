@@ -33,6 +33,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -172,11 +173,12 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			final String mainPart = quote + tableName + quote 
 					+ (StringUtils.isBlank(where) ? "" : " where " + where)
 					+ orderBy;
-			final DBConfig.Database db = dbConfig.getDatabases().getOrDefault(def.getType(), dbConfig.getDefaults());
+			final String paginationFormat = Optional.ofNullable(dbConfig.getDatabases().get(def.getType()))
+					.map(DBConfig.Database::getPaginationFormat).orElse(dbConfig.getDefaults().getPaginationFormat());
 			final String query = "SELECT * FROM " + 
 					mainPart + " " + 
-					db.getPaginationFormat().replace("$offset", String.valueOf(offset))
-											.replace("$pagesize", String.valueOf(DBConstants.PAGE_SIZE));
+					paginationFormat.replace("$offset", String.valueOf(offset))
+									.replace("$pagesize", String.valueOf(DBConstants.PAGE_SIZE));
 			LOG.info("Query [{}]", query);
 			try (Statement statement = con.createStatement();
 				ResultSet rs = statement.executeQuery(query)) {
