@@ -8,6 +8,7 @@ nppBackup/
 /tmp/
 /logs
 /temp
+/.dbviewer
 
 ### STS ###
 .apt_generated
