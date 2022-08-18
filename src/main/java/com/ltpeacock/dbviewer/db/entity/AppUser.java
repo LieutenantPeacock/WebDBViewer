@@ -55,6 +55,8 @@ public class AppUser {
 	private List<Authority> authorities = new ArrayList<>(Arrays.asList(new Authority(RoleNames.USER, this)));
 	@ManyToMany(mappedBy = "users")
 	private List<DBConnectionDef> connections;
+	@OneToMany(mappedBy = "user")
+	private List<NamedQuery> queries;
 
 	public long getId() {
 		return id;
@@ -122,5 +124,13 @@ public class AppUser {
 
 	public void setConnections(List<DBConnectionDef> connections) {
 		this.connections = connections;
+	}
+
+	public List<NamedQuery> getQueries() {
+		return queries;
+	}
+
+	public void setQueries(List<NamedQuery> queries) {
+		this.queries = queries;
 	}
 }
