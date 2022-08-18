@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>DbViewer | Set Up</title>
+<title>Web DbViewer | Set Up</title>
 <link rel="stylesheet" href="<c:url value="/resources/css/icons/icons.css"/>" />
 <style>
 .setup-modal {

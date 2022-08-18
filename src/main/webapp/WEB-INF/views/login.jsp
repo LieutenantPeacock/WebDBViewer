@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>DbViewer | Log In</title>
+<title>Web DbViewer | Log In</title>
 <link rel="stylesheet" href="<c:url value="/resources/css/login.css"/>" />
 <link rel="stylesheet" href="<c:url value="/resources/css/viewer.css"/>" />
 <link rel="stylesheet" href="<c:url value="/resources/css/icons/icons.css"/>" />
