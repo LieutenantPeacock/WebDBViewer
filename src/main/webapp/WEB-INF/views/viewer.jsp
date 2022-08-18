@@ -10,7 +10,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="_csrf" content="${_csrf.token}" />
 <meta name="_csrf_header" content="${_csrf.headerName}" />
-<title>Database Viewer - Grant</title>
+<title>Web DBViewer</title>
 <link rel="stylesheet"
 	href="<c:url value="/resources/css/icons/icons.css"/>" />
 <link rel="stylesheet" href="<c:url value="/resources/css/style.css"/>"/>
@@ -64,7 +64,6 @@
 }
 
 #settingsCol {
-	min-width: 200px;
 	max-width: 300px;
 	overflow-y: auto;
 }
@@ -116,7 +115,7 @@ html, body {
 	<input type="hidden" id="basePath" value="<c:url value="/"/>"/>
 	<div class="container-fluid h-100 d-flex flex-column">
 		<div id="header" class="row flex-shrink-0">
-			<h1><a href="<c:url value="/"/>">DB Viewer</a></h1>
+			<h1><a href="<c:url value="/"/>">Web DBViewer</a></h1>
 			<p>Lieutenant Peacock</p>
 			<sec:authorize access="isAuthenticated()">
 				<sec:authentication property="principal.id" var="userId"/>
@@ -200,75 +199,95 @@ html, body {
 				</sec:authorize>
 			</div>
 			<div class="col border mh-100" style="overflow: auto;">
-				<c:if test="${tables != null}">
-					<div id="tableSelectContainer" class="row">
-						<div class="col-auto" style="min-width: 150px;">
-							<div class="form-floating">
-								<select class="form-select" id="tableSelect">
-									<c:forEach items="${tables}" var="table">
-										<option value="${table}" ${table == param.table ? 'selected': ''}>${table}</option>
-									</c:forEach>
-								</select>
-								<label for="tableSelect">Table</label>
-							</div>
-						</div>
-						<div class="col">
-							<form id="statementForm">
-								<div class="input-group mb-3">
-								  <div class="form-floating">
-								      <textarea class="form-control" id="statementTextarea" 
-								      	name="statement" placeholder="select * from ${param.table};"></textarea>
-								      <label for="statementTextarea">Enter SQL Statement</label>
-								  </div>
-								  <button class="btn btn-outline-secondary">Execute</button>
+				<c:if test="${not empty param.connection}">
+				<ul class="nav nav-tabs" role="tablist">
+				  <li class="nav-item" role="presentation">
+				    <button class="nav-link active" id="tableTabBtn" data-bs-toggle="tab" data-bs-target="#tableTab" type="button" role="tab" aria-controls="Table View" aria-selected="true">Table View</button>
+				  </li>
+				  <li class="nav-item" role="presentation">
+				    <button class="nav-link" id="runSQLTabBtn" data-bs-toggle="tab" data-bs-target="#runSQLTab" type="button" role="tab" aria-controls="Run SQL" aria-selected="false">Run SQL</button>
+				  </li>
+				</ul>
+				<div class="tab-content">
+					<div class="tab-pane fade show active" id="tableTab" role="tabpanel" aria-labelledby="tableTabBtn">
+						<c:if test="${tables != null}">
+							<div id="tableSelectContainer" class="row mb-3">
+								<div class="col-auto" style="min-width: 150px;">
+									<div class="form-floating">
+										<select class="form-select" id="tableSelect">
+											<c:forEach items="${tables}" var="table">
+												<option value="${table}" ${table == param.table ? 'selected': ''}>${table}</option>
+											</c:forEach>
+										</select>
+										<label for="tableSelect">Table</label>
+									</div>
 								</div>
-							</form>
+								<c:if test="${tableContents != null or tableContentsError != null}">
+									<div class="col">
+										<form id="whereFilterForm" class="h-100">
+											<div class="input-group h-100">
+												<span class="input-group-text">where</span>
+												<input type="text" class="form-control" id="whereFilterInput" placeholder="SQL expression to filter results" value="${param.where}"/>
+												<button class="btn btn-secondary">Apply Filter</button>
+											</div>
+										</form>
+									</div>
+								</c:if>
+							</div>
+						</c:if>
+						<div class="text-center ${tableContentsError != null ? 'text-danger' : ''}">
+							${tableContentsError}
 						</div>
-					</div>
-				</c:if>
-				<div class="text-center ${tableContentsError != null ? 'text-danger' : ''}" id="statementMessage">
-					${tableContentsError}
-				</div>
-				<c:if test="${tableContents != null or tableContentsError != null}">
-					<form id="whereFilterForm">
-						<div class="input-group mb-3 mx-auto" style="width: 80%;">
-							<span class="input-group-text">where</span>
-							<input type="text" class="form-control" id="whereFilterInput" placeholder="SQL expression to filter results" value="${param.where}"/>
-							<button class="btn btn-secondary">Apply Filter</button>
-						</div>
-					</form>
-				</c:if>
-				<table class="table table-bordered table-hover" id="tableContents">
-					<c:if test="${tableContents != null}">
-						<thead>
-							<tr>
-								<c:forEach var="column" items="${tableContents.columns}">
-									<c:set var="sortClasses" value="${['fa-sort', 'fa-arrow-up-short-wide', 'fa-arrow-down-wide-short']}"/>
-									<th scope="col">
-										<span title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</span>
-										<i class="fa-solid ${sortClasses[column.dir.ordinal()]} sort-icon" title="Sort on column" data-sort-idx="${column.dir.ordinal()}"></i>
-									</th>
-								</c:forEach>
-							</tr>
-						</thead>
-						<tbody>
-							<c:forEach var="row" items="${tableContents.rows}">
-								<tr>
-									<c:forEach var="val" items="${row}">
-										<td>${val}</td>
+						<table class="table table-bordered table-hover" id="tableContents">
+							<c:if test="${tableContents != null}">
+								<thead>
+									<tr>
+										<c:forEach var="column" items="${tableContents.columns}">
+											<c:set var="sortClasses" value="${['fa-sort', 'fa-arrow-up-short-wide', 'fa-arrow-down-wide-short']}"/>
+											<th scope="col">
+												<span title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</span>
+												<i class="fa-solid ${sortClasses[column.dir.ordinal()]} sort-icon" title="Sort on column" data-sort-idx="${column.dir.ordinal()}"></i>
+											</th>
+										</c:forEach>
+									</tr>
+								</thead>
+								<tbody>
+									<c:forEach var="row" items="${tableContents.rows}">
+										<tr>
+											<c:forEach var="val" items="${row}">
+												<td>${val}</td>
+											</c:forEach>
+										</tr>
 									</c:forEach>
-								</tr>
-							</c:forEach>
-						</tbody>
-					</c:if>
-				</table>
-				<c:if test="${tableContents != null}">
-					<div id="tablePagination">
-						<lp:pagination currentPage="${currentPage}" firstPage="1" lastPage="${lastPage}"
-							rootClass="pagination justify-content-center" currentClass="active"
-							pageClass="page-item" generateDisabledLinks="true"
-							pageLinkGenerator="${pageLinkGenerator}" basePageLink="${currentUri}"/>
+								</tbody>
+							</c:if>
+						</table>
+						<c:if test="${tableContents != null}">
+							<div id="tablePagination">
+								<lp:pagination currentPage="${currentPage}" firstPage="1" lastPage="${lastPage}"
+									rootClass="pagination justify-content-center" currentClass="active"
+									pageClass="page-item" generateDisabledLinks="true"
+									pageLinkGenerator="${pageLinkGenerator}" basePageLink="${currentUri}"/>
+							</div>
+						</c:if>
 					</div>
+					<div class="tab-pane fade" id="runSQLTab" role="tabpanel" aria-labelledby="runSQLTabBtn">
+						<form id="statementForm" class="mt-3">
+							<div class="input-group mb-3">
+							  <div class="form-floating">
+							      <textarea class="form-control" id="statementTextarea" rows="5" style="height: 100%;"
+							      	name="statement" placeholder="select * from ${param.table};"></textarea>
+							      <label for="statementTextarea">Enter SQL Statement</label>
+							  </div>
+							  <button class="btn btn-outline-secondary">Execute</button>
+							</div>
+						</form>
+						<div id="statementMessage">
+						</div>
+						<table class="table table-bordered table-hover" id="queryResultContents">
+						</table>
+					</div>
+				</div>
 				</c:if>
 			</div>
 		</div>

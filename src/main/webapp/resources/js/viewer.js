@@ -286,7 +286,7 @@
 	}
 	driverPathSelect?.addEventListener('change', onDriverPathChange);
 	const statementMessage = document.getElementById('statementMessage');
-	const $tableContents = $('#tableContents');
+	const $queryResultContents = $('#queryResultContents');
 	function getConnectionId() {
 		return new URLSearchParams(location.search).get('connection')
 	}
@@ -303,17 +303,16 @@
 				statementMessage.classList.add('text-danger');
 				statementMessage.textContent = data.errorMessage;
 			} else {
-				$('#tablePagination, #whereFilterForm').remove();
 				if(data.value.results){
 					const tableData = data.value.results;
-					$tableContents.empty();
+					$queryResultContents.empty();
 					const $thead = $('<thead/>');
 					const $theadrow = $('<tr/>');
 					for (const column of tableData.columns) {
 						$theadrow.append(`<th scope="col"><span title="${column.name}: ${column.typeName}(${column.displaySize})">${column.name}</span></th>`);
 					}
 					$thead.append($theadrow);
-					$tableContents.append($thead);
+					$queryResultContents.append($thead);
 					const $tbody = $('<tbody/>');
 					for (const row of tableData.rows) {
 						const $tr = $('<tr/>');
@@ -322,7 +321,7 @@
 						}
 						$tbody.append($tr);
 					}
-					$tableContents.append($tbody);
+					$queryResultContents.append($tbody);
 					statementMessage.textContent = data.value.results.message;
 				} else {
 					statementMessage.textContent = 'Updated ' + data.value.updateCount + ' rows.';
