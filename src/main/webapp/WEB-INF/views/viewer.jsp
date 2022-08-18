@@ -65,7 +65,7 @@
 }
 
 #settingsCol {
-	max-width: 300px;
+	max-width: 250px;
 	overflow-y: auto;
 }
 
@@ -82,13 +82,15 @@ html, body {
 }
 
 #tableContents td {
-	word-break: break-all; /* overflow-wrap: break-word; */
+	word-break: break-word;
 }
 
 .connection-edit {
-	font-size: inherit;
+	font-size: 16px;
 	color: green;
 	cursor: pointer;
+	vertical-align: bottom;
+	word-break: break-word;
 }
 
 .remove-connection-user {
@@ -96,7 +98,6 @@ html, body {
 	color: red;
 	cursor: pointer;
 }
-
 
 .sort-icon {
 	cursor: pointer;
@@ -109,6 +110,45 @@ html, body {
 
 #testConnectionBtn:hover {
 	background-color: #2de810;
+}
+
+.connection-container {
+	outline: 2px solid #bebbc9;
+	border-radius: 5px;
+	font-size: 12px;
+	margin-top: 5px;
+	word-break: break-word;
+}
+
+.connection-container .connection-name {
+	max-width: 80%;
+	font-size: 16px;
+}
+
+.connection-container.active > .top-row {
+	background-color: #92dea7;
+}
+
+.connection-container.active .connection-name:before {
+	content: "";
+	background-color: green;
+	border-radius: 50%;
+	padding: 1px 3px;
+	height: 7px;
+	width: 7px;
+	font-size: 10px;
+	vertical-align: 9px;
+	display: inline-block;
+	margin-right: 1px;
+}
+
+.connection-container > .top-row {
+	background-color: #d3d3d3;
+	padding: 3px;
+}
+
+.connection-container > details {
+	padding: 3px;
 }
 </style>
 </head>
@@ -139,47 +179,55 @@ html, body {
 						<span style="font-weight: bold;" id="noConnections">Currently no connections!</span>
 					</c:if>
 					<sec:authorize access="hasRole('ADMIN')">
-						<button type="button" class="btn btn-primary" id="newConnectionBtn" data-bs-toggle="modal" data-bs-target="#connectionModal">
+						<button type="button" class="btn btn-primary w-100" id="newConnectionBtn" data-bs-toggle="modal" data-bs-target="#connectionModal">
 							Add New Connection
 						</button>
 					</sec:authorize>
 					<c:forEach items="${connections}" var="connection">
-						<div class="card mt-3 connection-container ${connection.id == param.connection ? 'active' : ''}" data-id="${connection.id}">
-						  <div class="card-body">
-						    <h5 class="card-title"><span class="connection-name">${connection.name}</span>
-						    	<sec:authorize access="hasRole('ADMIN')">
-						    		<span class="material-icons connection-edit" title="Edit">edit</span>
-						    	</sec:authorize>
-						    </h5>
-					    	<details class="card-text">
+						<div class="connection-container ${connection.id == param.connection ? 'active' : ''}"
+							data-id="${connection.id}">
+							<div class="d-flex top-row">
+						  		<div class="col-auto connection-name">${connection.name}</div>
+						    	<div class="col-auto ms-auto">
+						    		<sec:authorize access="hasRole('ADMIN')">
+						    			<span class="material-icons connection-edit" title="Edit">edit</span>
+						    		</sec:authorize>
+						    		<a href="<c:url value="/?connection=${connection.id}"/>" title="Open Connection">
+						    			<img src="<c:url value="/resources/imgs/database.svg"/>" width="15">
+						    		</a>
+						  		</div>
+						  	</div>
+					    	<details>
 					    		<summary>Details</summary>
 					    		<strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
+					    		<strong class="text-decoration-underline">Database Type:</strong> ${connection.type} <br/>
 					    		<strong class="text-decoration-underline">Username</strong>: ${connection.username} <br/>
 					    		<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
 						    	<strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}
 					    	</details>
-						    <a href="<c:url value="/?connection=${connection.id}"/>" class="btn btn-primary">Open Connection</a>
-						  </div>
 						</div>
 					</c:forEach>
 				</div>
 				<template id="connectionTemplate">
-					<div class="card mt-3 connection-container">
-					  <div class="card-body">
-					    <h5 class="card-title"><span class="connection-name">${connection.name}</span>
-					    	<sec:authorize access="hasRole('ADMIN')">
-					    		<span class="material-icons connection-edit" title="Edit">edit</span>
-					    	</sec:authorize>
-					    </h5>
-				    	<details class="card-text">
+					<div class="connection-container">
+						<div class="d-flex top-row">
+					  		<div class="col-auto connection-name">${connection.name}</div>
+					    	<div class="col-auto ms-auto">
+					    		<sec:authorize access="hasRole('ADMIN')">
+					    			<span class="material-icons connection-edit" title="Edit">edit</span>
+					    		</sec:authorize>
+					    		<a href="<c:url value="/?connection=${connection.id}"/>" title="Open Connection">
+					    			<img src="<c:url value="/resources/imgs/database.svg"/>" width="15">
+					    		</a>
+					  		</div>
+					  	</div>
+				    	<details>
 				    		<summary>Details</summary>
 				    		<strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
 				    		<strong class="text-decoration-underline">Username</strong>: ${connection.username} <br/>
 				    		<strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
 					    	<strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}
 				    	</details>
-					    <a href="<c:url value="/?connection=${connection.id}"/>" class="btn btn-primary">Open Connection</a>
-					  </div>
 					</div>
 				</template>
 				<sec:authorize access="hasRole('ADMIN')">

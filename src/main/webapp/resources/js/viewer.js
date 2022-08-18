@@ -34,6 +34,7 @@
 		connectionEl.querySelector('details').innerHTML =
 `<summary>Details</summary>
 <strong class="text-decoration-underline">JDBC URL</strong>: ${connection.url} <br/>
+<strong class="text-decoration-underline">Database Type:</strong> ${connection.type} <br/>
 <strong class="text-decoration-underline">Username</strong>: ${connection.username} <br/>
 <strong class="text-decoration-underline">Driver Path</strong>: ${connection.driverPath} <br/>
 <strong class="text-decoration-underline">Driver Class Name</strong>: ${connection.driverName}`;
