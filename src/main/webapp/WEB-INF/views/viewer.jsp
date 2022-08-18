@@ -28,14 +28,14 @@
 	color: #fff;
 	font-family: 'Bebas Neue';
 	position: relative;
-	padding: 5px 10%;
+	padding-left: .4%;
 }
 
-#header h1 {
+#appName {
 	margin-bottom: 0;
 }
 
-#header p {
+#author {
 	font-size: 25px;
 	margin-top: 0;
 	font-style: italic;
@@ -52,10 +52,12 @@
 }
 
 #logoutControl {
-	position: absolute;
+/* 	position: absolute;
 	top: 0;
 	right: 0;
+	width: auto; */
 	font-size: 1.2em;
+	padding: 0;
 }
 
 #logoutControl .material-icons {
@@ -150,25 +152,36 @@ html, body {
 .connection-container > details {
 	padding: 3px;
 }
+
+#currentUser {
+	font-family: 'Arial';
+	vertical-align: middle;
+}
 </style>
 </head>
 <body>
 	<input type="hidden" id="basePath" value="<c:url value="/"/>"/>
 	<div class="container-fluid h-100 d-flex flex-column">
 		<div id="header" class="row flex-shrink-0">
-			<h1><a href="<c:url value="/"/>">Web DBViewer</a></h1>
-			<p>Lieutenant Peacock</p>
+			<div class="col-auto h1" id="appName"><a href="<c:url value="/"/>">Web DBViewer</a></div>
+			<div class="col-auto align-self-center" id="author">Lieutenant Peacock</div>
+			<div class="col-auto align-self-center">
+				<a class="btn btn-danger" href="https://github.com/LieutenantPeacock/WebDBViewer/issues">Report Issue</a>
+			</div>
 			<sec:authorize access="isAuthenticated()">
 				<sec:authentication property="principal.id" var="userId"/>
 				<input type="hidden" id="userId" value="${userId}"/>
-				<form method="POST" action="<c:url value="/logout"/>" title="Log Out">
-					<div id="logoutControl">
+				<div id="logoutControl" class="col-auto ms-auto">
+					<span id="currentUser">
+						Hello, <sec:authentication property="name"/>
+					</span>
+					<form method="POST" action="<c:url value="/logout"/>" title="Log Out" class="d-inline-block">
 						<button style="background: transparent; border: none; padding: 0;">
 							<span class="material-icons"> logout </span>
 						</button>
-					</div>
-					<sec:csrfInput />
-				</form>
+						<sec:csrfInput />
+					</form>
+				</div>
 			</sec:authorize>
 		</div>
 		<div class="row flex-grow-1" style="min-height: 0;">
