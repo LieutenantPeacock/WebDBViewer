@@ -9,12 +9,12 @@
 		<version>2.7.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.colonelparrot</groupId>
-	<artifactId>dbviewer</artifactId>
+	<groupId>com.lt-peacock</groupId>
+	<artifactId>webdbviewer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>DBViewer</name>
-	<description>SQL database viewer.</description>
+	<name>Web DBViewer</name>
+	<description>Web SQL database viewer.</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
