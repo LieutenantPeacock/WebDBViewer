@@ -61,8 +61,8 @@ public class Util {
 		return str == null ?
 				"null"
 				: NEWLINE_PAT.matcher(
-					CARRIAGE_RETURN_PAT.matcher(str).replaceAll("\\R")
-				).replaceAll("\\N");
+					CARRIAGE_RETURN_PAT.matcher(str).replaceAll("\\\\R")
+				).replaceAll("\\\\N");
 	}
 	
 	public static String toOneLine(final Throwable t) {
