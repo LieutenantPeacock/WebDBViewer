@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="<c:url value="/resources/css/style.css"/>"/>
 <link rel="stylesheet"
 	href="<c:url value="/resources/css/bootstrap-5.2.0.min.css"/>" />
+<link rel="stylesheet" href="<c:url value="/resources/css/bootstrap-select-1.14.0-beta3.min.css"/>"/>
 <link rel="stylesheet" href="<c:url value="/resources/css/jquery-ui-1.13.2.min.css"/>"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
@@ -272,14 +273,26 @@ html, body {
 						</c:if>
 					</div>
 					<div class="tab-pane fade" id="runSQLTab" role="tabpanel" aria-labelledby="runSQLTabBtn">
+						<select class="selectpicker" id="namedQuerySelect" title="Use named query" data-style="mt-3">
+							<c:forEach var="query" items="${queries}">
+								<option value="${query.sql}">${query.name}</option>
+							</c:forEach>
+						</select>
 						<form id="statementForm" class="mt-3">
-							<div class="input-group mb-3">
+							<div class="input-group">
 							  <div class="form-floating">
-							      <textarea class="form-control" id="statementTextarea" rows="5" style="height: 100%;"
-							      	name="statement" placeholder="select * from ${param.table};"></textarea>
+							      <textarea class="form-control" id="statementTextarea" rows="4" style="height: 100%;"
+							      	name="statement" placeholder="select * from ${param.table};" maxlength="8192"></textarea>
 							      <label for="statementTextarea">Enter SQL Statement</label>
 							  </div>
 							  <button class="btn btn-outline-secondary">Execute</button>
+							</div>
+						</form>
+						<form id="saveQueryForm" style="margin-top: 3px;">
+							<div class="input-group mb-3">
+								<label for="queryNameInput" class="input-group-text">Set Query Name:</label>
+								<input class="form-control" maxlength="64" type="text" id="queryNameInput" name="name" placeholder="Query name"/>
+								<button class="btn btn-success">Save Query</button>
 							</div>
 						</form>
 						<div id="statementMessage">
@@ -464,6 +477,7 @@ html, body {
 	</script>
 	<script src="<c:url value="/resources/js/bootstrap-5.2.0.bundle.min.js"/>"></script>
 	<script src="<c:url value="/resources/js/jquery-3.6.0.min.js"/>"></script>
+	<script src="<c:url value="/resources/js/bootstrap-select-1.14.0-beta3.min.js"/>"></script>
 	<script src="<c:url value="/resources/js/jquery-ui-1.13.2.min.js"/>"></script>
 	<script src="<c:url value="/resources/js/viewer.js"/>"></script>
 </body>

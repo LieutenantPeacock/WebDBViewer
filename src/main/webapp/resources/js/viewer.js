@@ -302,6 +302,7 @@
 			if (data.errorMessage) {
 				statementMessage.classList.add('text-danger');
 				statementMessage.textContent = data.errorMessage;
+				$queryResultContents.empty();
 			} else {
 				if(data.value.results){
 					const tableData = data.value.results;
@@ -371,5 +372,30 @@
 			}).catch(error => {
 				userFormError.textContent = 'An error occurred.';
 			});
+	});
+	const namedQuerySelect = document.getElementById('namedQuerySelect');
+	$('#saveQueryForm').submit(function(e){
+		e.preventDefault();
+		const formData = new FormData(this);
+		formData.append('sql', $('#statementTextarea').val());
+		$('#statementMessage').removeClass('text-danger').text('');
+		$('#queryNameInput').val('');
+		_fetch(basePath + 'newQuery', {method: 'POST', body: formData})
+			.then(data => {
+				if (data.errorMessage) {
+					$('#statementMessage').addClass('text-danger').text(data.errorMessage);
+				} else {
+					namedQuerySelect.add(new Option(data.value.name, data.value.sql, false, true));
+					$(namedQuerySelect).selectpicker('refresh');
+				}
+			}).catch(error => {
+				$('#statementMessage').addClass('text-danger').text('An error occurred.');
+			});
+	});
+	$('#namedQuerySelect').change(function(e){
+		statementTextarea.value = this.value;
+	});
+	$('#statementTextarea').on('input', function(e){
+		$('#namedQuerySelect').selectpicker('val', '');
 	});
 })();

@@ -33,6 +33,7 @@ import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.SortDirection;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
+import com.ltpeacock.dbviewer.db.dto.NamedQueryDTO;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.form.NewUserForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
@@ -40,6 +41,7 @@ import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
 import com.ltpeacock.dbviewer.response.SimpleResponse;
 import com.ltpeacock.dbviewer.service.DBConnectionService;
 import com.ltpeacock.dbviewer.service.DriversService;
+import com.ltpeacock.dbviewer.service.NamedQueryService;
 import com.ltpeacock.dbviewer.service.UserService;
 import com.ltpeacock.taglib.pagination.PageLinkGenerator;
 
@@ -61,6 +63,8 @@ public class ViewController {
 	private PageLinkGenerator pageLinkGenerator;
 	@Autowired
 	private DBConfig dbConfig;
+	@Autowired
+	private NamedQueryService namedQueryService;
 
 	@GetMapping("/")
 	public String viewer(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
@@ -99,6 +103,7 @@ public class ViewController {
 		model.addAttribute("databases", dbConfig.getDatabases());
 		model.addAttribute("connections", userService.getConnections(principal.getId()));
 		model.addAttribute("drivers", driversService.getDriverPaths());
+		model.addAttribute("queries", userService.getQueries(principal.getId()));
 		if (request.isUserInRole(RoleNames.ADMIN)) {
 			model.addAttribute("users", userService.getAllUsers());
 		}
@@ -173,5 +178,12 @@ public class ViewController {
 	public SimpleResponse<String> testConnection(final ConnectionForm form, 
 			@AuthenticationPrincipal final AppUserPrincipal principal) {
 		return this.dbConnectionService.testConnection(form, principal.getId());
+	}
+	
+	@PostMapping("/newQuery")
+	@ResponseBody
+	public SimpleResponse<NamedQueryDTO> newQuery(final @RequestParam String name, final @RequestParam String sql,
+			final @AuthenticationPrincipal AppUserPrincipal principal) {
+		return this.namedQueryService.createNamedQuery(principal.getId(), name, sql);
 	}
 }
