@@ -23,6 +23,7 @@ import org.springframework.validation.BindingResult;
 
 import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
+import com.ltpeacock.dbviewer.db.dto.NamedQueryDTO;
 import com.ltpeacock.dbviewer.db.entity.AppUser;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.form.NewUserForm;
@@ -41,4 +42,5 @@ public interface UserService {
 	List<AppUserDTO> findUsersNotInConnectionWithSimilarUsername(final long connectionId, 
 			final String username);
 	SimpleResponse<AppUserDTO> getUserInfo(final String username);
+	List<NamedQueryDTO> getQueries(final long id);
 }

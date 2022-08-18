@@ -31,6 +31,7 @@ import com.ltpeacock.dbviewer.commons.AppUserPrincipal;
 import com.ltpeacock.dbviewer.commons.RoleNames;
 import com.ltpeacock.dbviewer.commons.SetupInfo;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
+import com.ltpeacock.dbviewer.db.dto.NamedQueryDTO;
 import com.ltpeacock.dbviewer.db.entity.AppUser;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
@@ -113,5 +114,11 @@ public class UserServiceImpl implements UserService {
 		final AppUser user = userRepository.findByUsernameIgnoreCase(username);
 		return user != null ? new SimpleResponse<>(new AppUserDTO(user)) : 
 				new SimpleResponse<>("User does not exist.");
+	}
+
+	@Transactional(readOnly = true)
+	@Override
+	public List<NamedQueryDTO> getQueries(final long id) {
+		return userRepository.findById(id).getQueries().stream().map(NamedQueryDTO::new).collect(Collectors.toList());
 	}
 }
