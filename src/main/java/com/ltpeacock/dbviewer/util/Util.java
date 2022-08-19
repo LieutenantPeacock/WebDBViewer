@@ -59,16 +59,16 @@ public class Util {
 
 	public static String replaceLineBreaks(final String str) {
 		return str == null ?
-				"null"
+				null
 				: NEWLINE_PAT.matcher(
 					CARRIAGE_RETURN_PAT.matcher(str).replaceAll("\\\\R")
 				).replaceAll("\\\\N");
 	}
-	
+
 	public static String toOneLine(final Throwable t) {
-		return replaceLineBreaks(ExceptionUtils.getStackTrace(t));
+		return t != null ? replaceLineBreaks(ExceptionUtils.getStackTrace(t)) : null;
 	}
-	
+
 	public static String toOneLine(final Object o) {
 		return replaceLineBreaks(String.valueOf(o));
 	}
