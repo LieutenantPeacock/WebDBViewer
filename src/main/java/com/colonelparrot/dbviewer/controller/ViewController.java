@@ -43,6 +43,7 @@ import com.ltpeacock.dbviewer.service.DBConnectionService;
 import com.ltpeacock.dbviewer.service.DriversService;
 import com.ltpeacock.dbviewer.service.NamedQueryService;
 import com.ltpeacock.dbviewer.service.UserService;
+import com.ltpeacock.dbviewer.util.BuildInfo;
 import com.ltpeacock.taglib.pagination.PageLinkGenerator;
 
 /**
@@ -65,6 +66,8 @@ public class ViewController {
 	private DBConfig dbConfig;
 	@Autowired
 	private NamedQueryService namedQueryService;
+	@Autowired
+	private BuildInfo buildInfo;
 
 	@GetMapping("/")
 	public String viewer(final Model model, @AuthenticationPrincipal final AppUserPrincipal principal,
@@ -104,6 +107,8 @@ public class ViewController {
 		model.addAttribute("connections", userService.getConnections(principal.getId()));
 		model.addAttribute("drivers", driversService.getDriverPaths());
 		model.addAttribute("queries", userService.getQueries(principal.getId()));
+		model.addAttribute("version", buildInfo.get(BuildInfo.GIT_BUILD_VERSION));
+		model.addAttribute("commitId", buildInfo.get(BuildInfo.GIT_COMMIT_ID_ABBREV));
 		if (request.isUserInRole(RoleNames.ADMIN)) {
 			model.addAttribute("users", userService.getAllUsers());
 		}

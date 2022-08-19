@@ -365,6 +365,9 @@ html, body {
 				</c:if>
 			</div>
 		</div>
+		<div class="row flex-shrink-0 justify-content-center">
+			Build: ${version} / ${commitId}
+		</div>
 	</div>
 	<sec:authorize access="hasRole('ADMIN')">
 	<div class="modal fade" id="connectionModal" tabindex="-1"
