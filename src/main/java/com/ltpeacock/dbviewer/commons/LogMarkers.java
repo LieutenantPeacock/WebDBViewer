@@ -26,6 +26,7 @@ import org.slf4j.MarkerFactory;
 public final class LogMarkers {
 	public static final Marker AUDIT = MarkerFactory.getMarker("AUDIT");
 	public static final Marker FORBIDDEN_ACCESS = MarkerFactory.getMarker("FORB");
+	public static final Marker BUILD_INFO = MarkerFactory.getMarker("BuildInfo");
 
 	private LogMarkers() {
 		throw new UnsupportedOperationException();
