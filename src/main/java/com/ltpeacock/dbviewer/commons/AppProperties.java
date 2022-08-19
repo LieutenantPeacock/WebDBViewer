@@ -29,6 +29,10 @@ public class AppProperties {
 	private String driversDir = appRoot + "/ext/drivers";
 	private String tempPassword;
 	private String confDir = appRoot + "/conf";
+	/**
+	 * Whether or not to show raw exceptions with stracktraces to regular (non-admin) users.
+	 */
+	private boolean showRawExceptionsToUsers = false;
 	
 	public String getAppRoot() {
 		return appRoot;
@@ -68,5 +72,13 @@ public class AppProperties {
 
 	public void setConfDir(String confDir) {
 		this.confDir = confDir;
+	}
+
+	public boolean isShowRawExceptionsToUsers() {
+		return showRawExceptionsToUsers;
+	}
+
+	public void setShowRawExceptionsToUsers(boolean showRawExceptionsToUsers) {
+		this.showRawExceptionsToUsers = showRawExceptionsToUsers;
 	}
 }
