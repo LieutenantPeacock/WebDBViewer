@@ -46,6 +46,8 @@ public class BuildInfo {
 	public static final String GIT_COMMIT_ID_ABBREV = "git.commit.id.abbrev";
 	/** Constant for {@code "git.tags"}. */
 	public static final String GIT_TAGS = "git.tags";
+	/** Constant for {@code "git.build.version"}. */
+	public static final String GIT_BUILD_VERSION = "git.build.version";
 	private Properties gitProps;
 
 	@PostConstruct
