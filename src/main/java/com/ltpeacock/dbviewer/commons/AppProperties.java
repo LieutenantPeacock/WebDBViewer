@@ -24,10 +24,32 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "dbviewer")
 public class AppProperties {
+	/**
+	 * The root directory used to store application files. This can be a relative or absolute path.
+	 */
 	private String appRoot = ".dbviewer";
+	/**
+	 * The path to store the database file at, if using the default embedded H2 database.
+	 * <br> <br>
+	 * Default: <i>"./" + dbviewer.app-root + "/db"</i>
+	 */
 	private String dbDir = "./" + appRoot + "/db"; // implicit relative paths not allowed by H2
+	/**
+	 * The directory to store the database driver JARs in.
+	 * <br> <br>
+	 * Default: <i>dbviewer.app-root + "/ext/drivers"</i>
+	 */
 	private String driversDir = appRoot + "/ext/drivers";
+	/**
+	 * The temporary password to use on the first run to setup the admin user. 
+	 * If not set, a random password will be generated.
+	 */
 	private String tempPassword;
+	/**
+	 * The directory to store the application configuration files.
+	 * <br> <br>
+	 * Default: <i>dbviewer.app-root + "/conf"</i>
+	 */
 	private String confDir = appRoot + "/conf";
 	/**
 	 * Whether or not to show raw exceptions with stracktraces to regular (non-admin) users.
