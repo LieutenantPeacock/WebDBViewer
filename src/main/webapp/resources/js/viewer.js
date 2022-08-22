@@ -16,9 +16,10 @@
 	const noConnections = document.getElementById('noConnections');
 	const connectionsContainer = document.getElementById('connectionsContainer');
 	const $connectionForm = $('#connectionForm');
-	connectionModal.addEventListener('hide.bs.modal', function(e){
-		$(this).find('.modal-footer > .alert').remove();
-	});
+	if (connectionModal)
+		connectionModal.addEventListener('hide.bs.modal', function(e){
+			$(this).find('.modal-footer > .alert').remove();
+		});
 	$('#newConnectionBtn').click(function(e){
 		$connectionForm[0].reset();
 		$('#connectionModalLabel').text('New Connection');

@@ -52,10 +52,6 @@
 }
 
 #logoutControl {
-/* 	position: absolute;
-	top: 0;
-	right: 0;
-	width: auto; */
 	font-size: 1.2em;
 	padding: 0;
 }
