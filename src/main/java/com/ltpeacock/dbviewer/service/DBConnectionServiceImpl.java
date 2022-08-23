@@ -27,7 +27,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
@@ -61,12 +61,12 @@ import com.ltpeacock.dbviewer.db.CustomDriverManager;
 import com.ltpeacock.dbviewer.db.DBConstants;
 import com.ltpeacock.dbviewer.db.QueryResult;
 import com.ltpeacock.dbviewer.db.SortDirection;
-import com.ltpeacock.dbviewer.db.TableColumn;
 import com.ltpeacock.dbviewer.db.dto.AppUserDTO;
 import com.ltpeacock.dbviewer.db.dto.DBConnectionDefDTO;
 import com.ltpeacock.dbviewer.db.entity.DBConnectionDef;
 import com.ltpeacock.dbviewer.db.repository.AppUserRepository;
 import com.ltpeacock.dbviewer.db.repository.DBConnectionDefRepository;
+import com.ltpeacock.dbviewer.db.util.TableDataResultSetExtractor;
 import com.ltpeacock.dbviewer.form.ConnectionForm;
 import com.ltpeacock.dbviewer.response.MappedErrorsResponse;
 import com.ltpeacock.dbviewer.response.MappedMultiErrorsResponse;
@@ -91,6 +91,8 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 	private HttpServletRequest request;
 	@Autowired
 	private DBConfig dbConfig;
+	@Autowired
+	private TableDataResultSetExtractor tableDataResultSetExtractor;
 
 	@Override
 	public MappedErrorsResponse<DBConnectionDefDTO> createConnection(final ConnectionForm form,
@@ -172,25 +174,33 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 			}
 			final int offset = (page - 1) * DBConstants.PAGE_SIZE;
 			final String mainPart = quote + tableName + quote 
-					+ (StringUtils.isBlank(where) ? "" : " where " + where)
-					+ orderBy;
+					+ (StringUtils.isBlank(where) ? "" : " where " + where);
 			final String paginationFormat = Optional.ofNullable(dbConfig.getDatabases().get(def.getType()))
-					.map(DBConfig.Database::getPaginationFormat).orElse(dbConfig.getDefaults().getPaginationFormat());
+					.map(DBConfig.Database::getPaginationFormat)
+					.orElseGet(() -> dbConfig.getDefaults().getPaginationFormat());
 			final String query = "SELECT * FROM " + 
-					mainPart + " " + 
+					mainPart + orderBy + " " + 
 					paginationFormat.replace("$offset", String.valueOf(offset))
 									.replace("$pagesize", String.valueOf(DBConstants.PAGE_SIZE));
-			LOG.info("Query [{}]", query);
-			try (Statement statement = con.createStatement();
-				ResultSet rs = statement.executeQuery(query)) {
-				final TableData tableData = resultSetToTableData(rs);
+			LOG.debug("Query [{}]", query);
+			try (Statement statement = con.createStatement();) {
+				final SimpleResponse<TableData> tableDataRes = getQueryResult(statement, query, 
+						tableDataResultSetExtractor);
+				if (tableDataRes.getErrorMessage() != null)
+					return tableDataRes;
+				final TableData tableData = tableDataRes.getValue();
 				if (sortColPos != -1)
 					tableData.getColumns().get(sortColPos).setDir(dir);
-				try (ResultSet rs2 = statement.executeQuery("SELECT COUNT(1) FROM " + 
-						mainPart)) {
-					rs2.next();
-					tableData.setTotalRows(rs2.getInt(1));
-				}
+				final String countQuery = "SELECT COUNT(*) FROM " + mainPart;
+				LOG.debug("Count query [{}]", countQuery);
+				final SimpleResponse<Integer> rowCountRes = getQueryResult(statement, countQuery,
+						rs -> {
+							rs.next();
+							return rs.getInt(1);
+						});
+				if (rowCountRes.getErrorMessage() != null)
+					return SimpleResponse.of(rowCountRes);
+				tableData.setTotalRows(rowCountRes.getValue());
 				return new SimpleResponse<>(tableData);
 			}
 		} catch (SQLException e) {
@@ -199,30 +209,20 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 		}
 	}
 	
-	private TableData resultSetToTableData(final ResultSet rs) throws SQLException {
-		final List<List<String>> rows = new ArrayList<>();
-		final ResultSetMetaData meta = rs.getMetaData();
-		final int colCount = meta.getColumnCount();
-		final List<TableColumn> columns = new ArrayList<>(colCount);
-		for(int col = 1; col <= colCount; col++) {
-			columns.add(new TableColumn(meta.getColumnLabel(col), 
-					meta.getColumnTypeName(col), meta.getColumnDisplaySize(col)));
+	private <T> SimpleResponse<T> getQueryResult(final Statement statement, final String query,
+			final ResultSetExtractor<T> extractor) {
+		ResultSet rs = null;
+		try {
+			rs = statement.executeQuery(query);
+			return SimpleResponse.withValue(extractor.extractData(rs));
+		} catch (SQLException e) {
+			LOG.error("SQLException executing query [{}]: [{}]", query, Util.toOneLine(e));
+			return SimpleResponse.withErrorMessage(e.getMessage());
+		} finally {
+			Util.closeOrWarn(rs);
 		}
-		for (int i = 0; i < DBConstants.MAX_QUERY_RESULTS && rs.next(); i++) {
-			final List<String> row = new ArrayList<>(colCount);
-			for (int col = 1; col <= colCount; col++) {
-				final Object value = rs.getObject(col);
-				row.add(String.valueOf(value));
-			}
-			rows.add(row);
-		}
-		final TableData tableData = new TableData(columns, rows);
-		if (rs.next()) {
-			tableData.setMessage("Results truncated to " + DBConstants.MAX_QUERY_RESULTS + " rows.");
-		}
-		return tableData;
 	}
-	
+		
 	@Transactional
 	@Override
 	public SimpleResponse<QueryResult> executeQuery(final long connectionId, final long userId,
@@ -239,7 +239,7 @@ public class DBConnectionServiceImpl implements DBConnectionService {
 				Statement statement = con.createStatement()) {
 			final boolean isResultSet = statement.execute(query);
 			final SimpleResponse<QueryResult> response = isResultSet ? 
-					new SimpleResponse<>(new QueryResult(resultSetToTableData(statement.getResultSet())))
+					new SimpleResponse<>(new QueryResult(TableDataResultSetExtractor.resultSetToTableData(statement.getResultSet())))
 					: new SimpleResponse<>(new QueryResult(statement.getUpdateCount()));
 			success = true;
 			return response;
