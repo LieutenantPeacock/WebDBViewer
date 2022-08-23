@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +39,7 @@ public class Util {
 		throw new UnsupportedOperationException();
 	}
 
+	private static final Logger LOG = LoggerFactory.getLogger(Util.class);
 	private static final Pattern CARRIAGE_RETURN_PAT = Pattern.compile("\r");
 	private static final Pattern NEWLINE_PAT = Pattern.compile("\n");
 
@@ -50,19 +53,15 @@ public class Util {
 		return result.getFieldErrors().stream()
 				.collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage, (a, b) -> a));
 	}
-	
+
 	public static Map<String, List<String>> toMultiErrorMap(final BindingResult result) {
-		return result.getFieldErrors().stream()
-				.collect(Collectors.groupingBy(FieldError::getField, 
-						Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
+		return result.getFieldErrors().stream().collect(Collectors.groupingBy(FieldError::getField,
+				Collectors.mapping(FieldError::getDefaultMessage, Collectors.toList())));
 	}
 
 	public static String replaceLineBreaks(final String str) {
-		return str == null ?
-				null
-				: NEWLINE_PAT.matcher(
-					CARRIAGE_RETURN_PAT.matcher(str).replaceAll("\\\\R")
-				).replaceAll("\\\\N");
+		return str == null ? null
+				: NEWLINE_PAT.matcher(CARRIAGE_RETURN_PAT.matcher(str).replaceAll("\\\\R")).replaceAll("\\\\N");
 	}
 
 	public static String toOneLine(final Throwable t) {
@@ -71,5 +70,14 @@ public class Util {
 
 	public static String toOneLine(final Object o) {
 		return replaceLineBreaks(String.valueOf(o));
+	}
+
+	public static void closeOrWarn(final AutoCloseable a) {
+		try {
+			if (a != null)
+				a.close();
+		} catch (Exception e) {
+			LOG.warn("Exception while closing", e);
+		}
 	}
 }
