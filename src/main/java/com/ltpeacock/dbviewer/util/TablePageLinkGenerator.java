@@ -30,9 +30,9 @@ import com.ltpeacock.taglib.pagination.PageLinkGenerator;
 @Component
 public class TablePageLinkGenerator implements PageLinkGenerator {
 	private static final Logger LOG = LoggerFactory.getLogger(TablePageLinkGenerator.class);
+
 	@Override
 	public String generateLink(final String basePageLink, final int page) {
-		return UriComponentsBuilder.fromUriString(basePageLink)
-				.replaceQueryParam("page", page).build().toUriString();
+		return UriComponentsBuilder.fromUriString(basePageLink).replaceQueryParam("page", page).build().toUriString();
 	}
 }
