@@ -47,4 +47,9 @@ public class SimpleResponse<T> {
 	public static <T> SimpleResponse<T> withErrorMessage(final String errorMessage) {
 		return new SimpleResponse<>(errorMessage);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> SimpleResponse<T> of(final SimpleResponse<?> res) {
+		return (SimpleResponse<T>) res;
+	}
 }
