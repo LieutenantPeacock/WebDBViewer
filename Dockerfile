@@ -16,7 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 FROM eclipse-temurin:8-jdk-alpine as build
-ARG WARFILE=target/checkout/target/*.war
+ARG WARFILE=target/*.war
 COPY ${WARFILE} app.war
 RUN mkdir build && (cd build; jar -xf ../app.war)
 # Set user and group permission to r-- for all files
