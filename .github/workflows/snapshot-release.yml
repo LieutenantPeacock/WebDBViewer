@@ -1,0 +1,29 @@
+name: Create Snapshot Release
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+      - name: Maven Build
+        run: mvn -B package
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "snapshot"
+          artifacts: "target/*.war"
+          name: "Snapshot Build"
+          allowUpdates: true
