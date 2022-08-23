@@ -1,4 +1,4 @@
-name: Build, Publish to Maven Central and Push Docker Image
+name: Build, Publish to Maven Central, Push Docker Image, Create Github Release
 
 on:
   push:
@@ -46,3 +46,16 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/webdbviewer:latest,${{ secrets.DOCKER_HUB_USERNAME }}/webdbviewer:${{ env.VERSION }}
       - name: Show image digest
         run: echo ${{ steps.docker_build_push.outputs.digest }}
+      - name: Create DockerCompose.zip
+        run: zip DockerCompose.zip docker-compose.yml .env
+      - name: Read Changelog
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        continue-on-error: true
+        with:
+          version: ${{ github.ref_name }}
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          body: ${{ steps.changelog_reader.outputs.changes }}
+          artifacts: "target/*.war,DockerCompose.zip"
