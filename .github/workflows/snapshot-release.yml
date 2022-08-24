@@ -21,9 +21,10 @@ jobs:
       - name: Maven Build
         run: mvn -B package
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
         with:
-          tag: "snapshot"
-          artifacts: "target/*.war"
-          name: "Snapshot Build"
-          allowUpdates: true
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "snapshot"
+          prerelease: false
+          files: target/*.war
+          title: "Snapshot Build"
