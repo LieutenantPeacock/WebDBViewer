@@ -4,5 +4,8 @@
 - Fix table viewing for SQLServer and Oracle
 - Fix table opening issue for non-admin users
 
+### Enhancements
+- Reduce table font size
+
 ## v1.0.0 (2022/08/19)
 Initial release.

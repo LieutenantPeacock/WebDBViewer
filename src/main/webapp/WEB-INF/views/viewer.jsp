@@ -153,6 +153,14 @@ html, body {
 	font-family: 'Arial';
 	vertical-align: middle;
 }
+
+.db-table td, .db-table th {
+	font-size: 12px;
+}
+
+#tablePagination a {
+	font-size: 12px;
+}
 </style>
 </head>
 <body>
@@ -296,7 +304,7 @@ html, body {
 						<div class="text-center ${tableContentsError != null ? 'text-danger' : ''}">
 							${tableContentsError}
 						</div>
-						<table class="table table-bordered table-hover" id="tableContents">
+						<table class="table table-bordered table-hover db-table" id="tableContents">
 							<c:if test="${tableContents != null}">
 								<thead>
 									<tr>
@@ -354,7 +362,7 @@ html, body {
 						</form>
 						<div id="statementMessage">
 						</div>
-						<table class="table table-bordered table-hover" id="queryResultContents">
+						<table class="table table-bordered table-hover db-table" id="queryResultContents">
 						</table>
 					</div>
 				</div>
