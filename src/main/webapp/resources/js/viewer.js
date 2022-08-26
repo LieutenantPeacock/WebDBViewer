@@ -7,7 +7,7 @@
 	function _fetch(resource, options) {
 		return fetch(resource, {...options, headers: {...options?.headers, [csrfHeader]: csrfToken}})
 				.then(res => {
-					if(!res.ok) throw Error('Response status: ' + res.status);
+					if(!res.ok) throw res;
 					return res.json();
 				});
 	}
@@ -259,9 +259,12 @@
 				} else {
 					showErrors(data.errors);
 				}
-			}).catch(error => {
-				driverUploadError.textContent = 'An error occurred.';
+			}).catch(res => {
 				driverUpload.classList.add('is-invalid');
+				driverUploadError.textContent = 'An error occurred.';
+				res.json().then(o =>{
+					if (o.errorMessage) driverUploadError.textContent = o.errorMessage;
+				}, ()=>{});
 			}).finally(() => {
 				this.disabled = false;
 			});
