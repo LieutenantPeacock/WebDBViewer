@@ -2,24 +2,33 @@ package com.colonelparrot.dbviewer.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -121,6 +130,31 @@ public class ViewController {
 	public MappedErrorsResponse<String> uploadDriver(final MultipartFile[] files, @RequestParam final String folder) {
 		LOG.info("Uploaded {} files", files.length);
 		return this.driversService.uploadDriver(files, folder);
+	}
+	
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<Map<String, String>> handleFileTooLarge(final MaxUploadSizeExceededException e) {
+		LOG.error("MaxUploadSizeExceededException", e);
+		final Throwable original = Optional.ofNullable(e).map(Throwable::getCause)
+											.map(Throwable::getCause).orElse(null);
+		if (original instanceof SizeLimitExceededException) {
+			final SizeLimitExceededException s = (SizeLimitExceededException) original;
+			return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+					.body(createSingleErrorMap(
+						"Total request size (" + s.getActualSize() + " bytes) exceeds the maximum of " 
+						+ s.getPermittedSize() + " bytes."));
+		} else if (original instanceof FileSizeLimitExceededException) {
+			final FileSizeLimitExceededException f = (FileSizeLimitExceededException) original;
+			return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+					.body(createSingleErrorMap(
+						"Maximum size for a single uploaded file (" + f.getPermittedSize() + " bytes) exceeded for file ["
+						+ f.getFileName() + "]"));
+		}
+		return null;
+	}
+	
+	private static Map<String, String> createSingleErrorMap(final String errorMessage){
+		return Collections.singletonMap("errorMessage", errorMessage);
 	}
 	
 	@GetMapping("/getDrivers")
