@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>com.lt-peacock</groupId>
 	<artifactId>webdbviewer</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.2</version>
 	<packaging>war</packaging>
 	<name>Web DBViewer</name>
 	<description>Web SQL database viewer.</description>
@@ -32,7 +32,7 @@
 		<connection>scm:git:git://github.com/LieutenantPeacock/WebDBViewer.git</connection>
 		<developerConnection>scm:git:file://d:/LocRepo/WebDBViewer.git</developerConnection>
 		<url>https://github.com/LieutenantPeacock/WebDBViewer</url>
-		<tag>HEAD</tag>
+		<tag>v1.0.2</tag>
 	</scm>
 	<distributionManagement>
 		<snapshotRepository>
