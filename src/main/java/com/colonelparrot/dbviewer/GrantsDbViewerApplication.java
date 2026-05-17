@@ -4,7 +4,7 @@ import static com.colonelparrot.dbviewer.GrantsDbViewerApplication.COLONEL_PARRO
 import static com.colonelparrot.dbviewer.GrantsDbViewerApplication.LT_PEACOCK_DBVIEWER_BASE;
 
 import java.io.File;
-import java.util.concurrent.ThreadLocalRandom;
+import java.security.SecureRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +33,7 @@ public class GrantsDbViewerApplication {
 	static final String COLONEL_PARROT_DBVIEWER_BASE = "com.colonelparrot.dbviewer";
 	static final String LT_PEACOCK_DBVIEWER_BASE = "com.ltpeacock.dbviewer";
 	private static final Logger LOG = LoggerFactory.getLogger(GrantsDbViewerApplication.class);
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 	@Autowired
 	private AppUserRepository userRepository;
 	@Autowired
@@ -56,32 +57,22 @@ public class GrantsDbViewerApplication {
 		final String tempPassword = appProps.getTempPassword();
 		if (userRepository.count() == 0) {
 			LOG.info("New installation detected: there are currently no users.");
-			final String password = tempPassword == null ? generateRandomString(8, false) : tempPassword;
+			final String password = tempPassword == null ? generateRandomString(16, false) : tempPassword;
 			LOG.info("<<< {} [{}] >>>",
 					(tempPassword == null ? "Generated temporary admin password": 
 							"Using user provided temporary password"),
 					password);
 			setupInfo.setAdminPassword(password);
-		} else if(tempPassword != null) {
+		} else if (tempPassword != null) {
 			LOG.warn("This is not a new installation; user provided temporary password is ignored.");
 		}
 	}
 
 	private static String generateRandomString(final int length, final boolean latinCharacters) {
-		int lowerBound = 34;
-		int upperBound = 125;
-		if (latinCharacters) {
-			lowerBound = 97;
-			upperBound = 122;
-		}
-		final StringBuilder str = new StringBuilder();
-		for (int i = 0; i < length; i++) {
-			str.append((char) randInt(lowerBound, upperBound));
-		}
-		return str.toString();
-	}
-
-	private static int randInt(final int min, final int max) {
-		return ThreadLocalRandom.current().nextInt(min, max + 1);
+		final int lowerBound = latinCharacters ? 97 : 34;
+		final int upperBound = latinCharacters ? 122 : 125;
+		return SECURE_RANDOM.ints(length, lowerBound, upperBound + 1)
+				.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+				.toString();
 	}
 }
